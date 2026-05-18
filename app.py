@@ -14,6 +14,12 @@ if "GEMINI_API_KEY" not in st.secrets:
 
 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
+# Initialize a standard search configuration for the backend model execution
+config = types.GenerateContentConfig(
+    tools=[{"google_search": {}}],
+    temperature=0.2,
+)
+
 # 3. User Input Interface (Updated to include Phase Dropdown)
 col1, col2 = st.columns([2, 1])
 with col1:
@@ -27,7 +33,10 @@ with col2:
 # Extract just the single number character from the dropdown selection string (e.g., "1")
 phase_num = phase_selection.split(":")[0][-1]
 
-    #------------------------------------------------------------------
+# 4. Run Analysis Framework Only When Ticker is Entered
+if ticker:
+
+    # ------------------------------------------------------------------
     # 🔴 PROMPT #1: Business Phase Analysis (Optimised for your tool)
     # ------------------------------------------------------------------
     with st.expander("🧭 Business Phase Analysis", expanded=True):
@@ -148,12 +157,11 @@ phase_num = phase_selection.split(":")[0][-1]
         """
         try:
             response = client.models.generate_content(model="gemini-2.5-flash", contents=moat_analysis_prompt, config=config)
-            st.write(response.text)
+            st.markdown(response.text)
         except Exception as e:
             st.error(f"Error running Moat Analysis: {e}")
 
-
-  # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     # 🔴 PROMPT #3: Business Growth Analysis v2.2 (Optimized for your tool)
     # ------------------------------------------------------------------
     with st.expander("🚀 Business Growth Analysis v2.2", expanded=True):
@@ -236,10 +244,9 @@ phase_num = phase_selection.split(":")[0][-1]
         """
         try:
             response = client.models.generate_content(model="gemini-2.5-flash", contents=growth_analysis_prompt, config=config)
-            st.write(response.text)
+            st.markdown(response.text)
         except Exception as e:
             st.error(f"Error running Business Growth Analysis: {e}")
-
 
     # ------------------------------------------------------------------
     # 🔴 PROMPT #4: Key Metrics Analysis Rev 2.2 (Optimised for your tool)
@@ -312,16 +319,10 @@ phase_num = phase_selection.split(":")[0][-1]
         [2] [Exact name of auxiliary data engine used]
         """
         try:
-            # We add phase_num directly to user contents so the prompt loop dynamically isolates the phase rules
-            response = client.models.generate_content(
-                model="gemini-2.5-flash", 
-                contents=metrics_analysis_prompt, 
-                config=config
-            )
-            st.write(response.text)
+            response = client.models.generate_content(model="gemini-2.5-flash", contents=metrics_analysis_prompt, config=config)
+            st.markdown(response.text)
         except Exception as e:
             st.error(f"Error running Key Metrics Analysis: {e}")
-
 
     # ------------------------------------------------------------------
     # 🔴 PROMPT #5: Business Risk Analysis v2.0 (Optimized for your tool)
@@ -398,10 +399,9 @@ phase_num = phase_selection.split(":")[0][-1]
         """
         try:
             response = client.models.generate_content(model="gemini-2.5-flash", contents=risk_analysis_prompt, config=config)
-            st.write(response.text)
+            st.markdown(response.text)
         except Exception as e:
             st.error(f"Error running Business Risk Analysis: {e}")
-
 
     # ------------------------------------------------------------------
     # 🔴 PROMPT #6: Financial Statement Analysis v1.1 (Text-Only Edition)
@@ -455,13 +455,11 @@ phase_num = phase_selection.split(":")[0][-1]
         [1] [Exact URL text or filing identifier from www.sec.gov]
         [2] [Official Company Investor Relations report identifier]
         """
-
         try:
             response = client.models.generate_content(model="gemini-2.5-flash", contents=financial_analysis_prompt, config=config)
             st.markdown(response.text)
         except Exception as e:
             st.error(f"Error executing Financial Statement Analysis: {e}")
-
 
     # ------------------------------------------------------------------
     # 🔴 PROMPT #7: Business Valuation Analysis (Optimized for your tool)
@@ -481,96 +479,12 @@ phase_num = phase_selection.split(":")[0][-1]
         - PHASE 2: RAPID GROWTH -> Primary: EV/Sales | Secondary: Forward P/S
         - PHASE 3: SOLID GROWTH -> Primary: Price-to-Sales (P/S) | Secondary: Forward EV/EBITDA
         - PHASE 4: MATURITY -> Primary: Discounted Cash Flow (DCF) or Reverse DCF | Secondary: Forward P/E
-        - PHASE 5: DECLINING -> Primary: Sum-of-the-Parts (SOTP) / Net Asset Value (NAV) | Secondary: Dividend Yield vs ERP
+        - PHASE 5: DECLINE -> Primary: Liquidation Value / Asset-Backed Valuation | Secondary: Normalized EV/FCF
 
-        *Industry Override Rule:* If the target company operates in Biotech/Life Sciences, prioritize a probability-adjusted NPV (pNPV). If SaaS, anchor using the Rule of 40 and EV/Gross Profit. If Energy/Mining, prioritize NAV/EV per Reserves. If a Bitcoin/Crypto Treasury, check mNAV vs peers.
-
-        Step 5: Apply peer group multi-comparison or the company's historical 3-year trailing range to assign a strict benchmarking status score:
-        - 🟩 Green = Undervalued (Multiple ≤ peer 25th percentile OR ≤ company's own 3-year low range)
-        - 🟨 Yellow = Fairly Valued / Within normal range (Multiple between the peer 25th and 75th percentiles)
-        - 🟥 Red = Overvalued (Multiple ≥ peer 75th percentile OR ≥ company's own 3-year high range)
-
-        Step 6: Generate your output using the exact template below. Do not add any conversational introductions, greetings, or extra explanations. Output ONLY the completed template:
-
-        **Company:** [Company Name / Ticker]
-        **Phase:** [{phase_num}] - [Insert matching phase taxonomy title name]
-        **Summary:** [Select one: 🟩 Undervalued / 🟨 Fairly Valued / 🟥 Overvalued]  
-
-        ### 📐 Core Valuation Metrics Summary Table
-        | Metric Computed | Valuation Formula Used | Target Corporate Metric Value | Peer / Historical Benchmark Status |
-        | :--- | :--- | :--- | :--- |
-        | [Primary Method Name] | [Insert Formula Definition] | [Calculated Value, e.g., 4.2x] | [🟩 Green / 🟨 Yellow / 🟥 Red] |
-        | [Secondary Method Name] | [Insert Formula Definition] | [Calculated Value, e.g., 12.5x] | [🟩 Green / 🟨 Yellow / 🟥 Red] |
-
-        - **Key Valuation Drivers:** [Provide a concise, 1-2 sentence scannable summary detailing how top-line growth, operating margins, or core structural risks are driving this specific multiple pricing.]
-        - **Sensitivity & Margin of Safety:** [Explain the fundamental corporate assumptions—such as changes in cost of capital, regulatory outcomes, or guidance misses—that would immediately shift this valuation footprint.]
-
-        ## 🔗 Sources Used
-        [1] [Exact name of core primary SEC filing or IR financial report used]
-        [2] [Exact name of transcript or secondary market data database utilized]
+        Step 5: Output your detailed phase-appropriate valuation layout clearly using markdown metrics. Do not include conversational preambles.
         """
         try:
             response = client.models.generate_content(model="gemini-2.5-flash", contents=valuation_analysis_prompt, config=config)
             st.markdown(response.text)
         except Exception as e:
             st.error(f"Error executing Business Valuation Analysis: {e}")
-
-
-    # ------------------------------------------------------------------
-    # 🔴 PROMPT #8: Intrinsic Valuation Analysis V1 (Optimized for your tool)
-    # ------------------------------------------------------------------
-    with st.expander("🧬 Intrinsic Valuation Analysis V1", expanded=True):
-        intrinsic_valuation_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are an expert equity analyst executing a rigorous intrinsic valuation protocol matched mechanically to a company's business cycle phase.
-        Target Stock Ticker: '{ticker}'
-        Target Corporate Phase: '{phase_num}'
-
-        Step 1: Use your Google Search tool to identify today's current date and year.
-        Step 2: Search SEC EDGAR (www.sec.gov) or international Investor Relations portals to acquire the latest 10-K, 10-Q, annual accounts, and earnings call transcripts for ticker '{ticker}'.
-        Step 3: Extract core quantitative baseline metrics: TTM revenue, 3-year history, historical operating margins, share count, long-term consensus guidance, cash, total debt, interest expense, and the effective tax rate.
-        Step 4: Dynamically calculate the Weighted Average Cost of Capital (WACC) to serve as your core discount rate using the strict mathematical expression:
-        $$WACC = \\frac{{E}}{{V}} \\times r_e + \\frac{{D}}{{V}} \\times r_d \\times (1 - T)$$
-        Where: E = Market value of equity, D = Market value of debt, V = E + D, re = Cost of equity via CAPM, rd = Cost of debt, T = Corporate tax rate.
-
-        Step 5: Compute the intrinsic company value applying the exact Phase Taxonomy method below:
-        - Phase 1: Startup -> DCF with Scenario Analysis paired with the Venture Capital (VC) Method.
-        - Phase 2: Early Growth -> Multi-Stage DCF (Aggressive Growth to Transition) cross-referenced with EV/EBITDA multiples.
-        - Phase 3: Solid Growth -> Two-Stage DCF model or a Residual Income Model.
-        - Phase 4: Maturity -> Single-Stage DCF or Dividend Discount Model (DDM).
-        - Phase 5: Decline -> Adjusted Present Value (APV) or a strict asset Liquidation Value analysis.
-
-        Step 6: Generate your output using the exact template below. Do not add any conversational remarks, intros, or extra explanations. Output ONLY the completed template:
-
-        **Company Name:** [Company Name] 
-        **Business Phase:** [{phase_num}] - [Insert matching phase taxonomy name] 
-
-        ### 📊 Valuation Summary
-        - **Method Used:** [Identify the primary and cross-reference validation methods applied]
-        - **Justification:** [Provide a brief 1-2 sentence overview explaining why this mechanical selection fits the asset's current phase profile.]
-
-        ### ⚙️ Key Valuation Assumptions
-        - **Projected Revenue Growth (CAGR):** [X%]
-        - **Target Operating Margin:** [X%]
-        - **Calculated WACC:** [X%]
-        - **Terminal Growth Rate:** [X%]
-
-        ### 🧮 Intrinsic Value Calculation
-        #### Step-by-Step Execution Breakdown:
-        1. **Baseline Inflows / Multiples Projection:** [Show the explicit mathematical steps, terminal values, or scenario weights generated from the primary model inputs.]
-        2. **Discounting / Present Value Summation:** [Show the cash flows or values being discounted back to today's dollar terms using your WACC rate or phase parameters.]
-        3. **Per-Share Derivation:** [Deduct net debt positions if calculating enterprise values, and divide the target balance by the fully diluted shares outstanding count.]
-
-        #### Core Valuation Output Findings:
-        - **Final Intrinsic Value:** [Currency and Amount, e.g., USD 142.50]
-        - **Current Market Price:** [Currency and Amount, e.g., USD 120.00] 
-        - **Price Difference / Margin of Safety:** [State whether the asset is Undervalued or Overvalued, and by what percentage relative to its intrinsic value score.]
-
-        ## 🔗 Sources Used
-        [1] [Exact file name and identifier from www.sec.gov or primary data engine]
-        [2] [Official Company Investor Relations corporate transcript or presentation reference]
-        """
-        try:
-            response = client.models.generate_content(model="gemini-2.5-flash", contents=intrinsic_valuation_prompt, config=config)
-            st.markdown(response.text)
-        except Exception as e:
-            st.error(f"Error executing Intrinsic Valuation Analysis: {e}")
