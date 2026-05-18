@@ -27,57 +27,44 @@ with col2:
 # Extract just the single number character from the dropdown selection string (e.g., "1")
 phase_num = phase_selection.split(":")[0][-1]
 
-    # ------------------------------------------------------------------
+    #------------------------------------------------------------------
     # 🔴 PROMPT #1: Business Phase Analysis (Optimised for your tool)
     # ------------------------------------------------------------------
     with st.expander("🧭 Business Phase Analysis", expanded=True):
         business_phase_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are a World-Class Strategic Analyst specialising in Business Lifecycle and Phase Identification. Your target stock ticker is: '{ticker}'. 
 
-        Step 1: Use your Google Search tool to identify today's current date and year. 
-        Step 2: Locate the most recent 10-K, 10-Q, Annual Report, and latest earnings call transcript for ticker '{ticker}' via SEC EDGAR or official Company Investor Relations pages. Do not use third-party aggregator sites.
-        Step 3: Internally evaluate the data against the following absolute BUSINESS PHASE CRITERIA to classify the company:
-        
-        1. Startup Phase: Negative/minimal forward revenue; high burn rate; product/market fit testing; heavy R&D; public within past few years.
-        2. Rapid Growth Phase: Revenue growth >40% YoY; not yet profitable (or just turned profitable); expanding customer base; high marketing reinvestment.
-        3. Solid Growth Phase: Steady revenue growth >20% YoY; earnings growing rapidly >30% YoY; improving margins; strong cash flow/FCF.
-        4. Maturity Phase: Slowing revenue growth (5% to 20% YoY); stable margins; strong cash flow; heavy focus on efficiency, dividends, or buybacks; market saturation.
-        5. Decline Phase: Negative or flat revenue growth; shrinking market share; margin compression; cost-cutting/layoffs; structural pivots.
+        Step 1: Use your Google Search tool to identify today's current date and year.
+        Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for ticker '{ticker}'.
+        Step 3: Analyze the company's trajectory, revenue patterns, and product maturity. Classify it strictly into one of the following 5 phases:
+        1. Startup (early product/market fit, not yet profitable)
+        2. Rapid Growth (rapid scaling, profitable or near-profitable)
+        3. Solid Growth (FCF positive, durable growth)
+        4. Maturity (stable Free Cash Flows, normalized growth)
+        5. Declining (shrinking revenue/earnings)
 
-        Step 4: Generate your output using the exact template below. Do not add any conversational filler, preambles, introductory remarks, or structural explanations. Output ONLY the completed template:
+        Step 4: Output your final findings using the template format below. Do not add any conversational preambles or filler text. Output ONLY the completed template:
 
-        # 🧭 BUSINESS PHASE ANALYSIS: [Company Name] ({ticker})
-        **📌 Primary Phase:** [Select one: 1. Startup 💡 / 2. Rapid Growth 🚀 / 3. Solid Growth 📈 / 4. Maturity 🏦 / 5. Decline 📉]
-        **Secondary Phase (if applicable):** [Optional - Explain if the company straddles two phases]
-        **Confidence Level:** [🟢HIGH / 🟡 MEDIUM / 🔴LOW] (Mark as low if data is incomplete or ambiguous)
+        # 🧭 Business Phase Analysis: [Company Name] ({ticker})
+        **Identified Phase:** [Phase Number: Phase Name]
+        **Confidence Level:** [High / Medium / Low]
 
-        📊 **Key Indicators Found:**
-        - Revenue Growth: [X% YoY]
-        - Operating Margin: [X%]
-        - Free Cash Flow: [$X million]
-        - Customer Growth: [X% YoY or N/A if not reported]
-        - CAC / Churn: [X / X% or N/A if not reported]
+        ### 📊 Phase Diagnostic Matrix
+        - **Revenue Growth Profile:** [Describe current trajectory vs historical baseline]
+        - **Profitability & Cash Flows:** [Identify status of Net Income, Operating Margins, and FCF generation]
+        - **Capital Allocation Trends:** [Note major behaviors like heavy R&D investment, aggressive M&A, share buybacks, or dividend payouts]
 
-        **🧠 Summary:**
-        [1–2 sentence summary written for a retail investor explaining why the company matches this phase using the metrics above.]
-
-        ## 📚 Supporting Evidence
-        Quote: "[Insert a direct quote from the latest earnings call or filing reflecting the company's current strategic focus or operational hurdles]"
-
-        ## ⚠️ Risks & Considerations
-        - Phase Transition Risk: [e.g., Growth to Maturity due to slowing expansion]
-        - Market Conditions: [e.g., macroeconomic headwinds impacting growth]
-        - Strategic Moves: [e.g., M&A, divestitures, new product lines]
+        ### 🔬 Phase Justification Narrative
+        [Provide a clear, cohesive 2-3 sentence paragraph explaining precisely why the company fits into this specific lifecycle phase based on the financial evidence.]
 
         ## 🔗 Sources Used
-        [1] [Exact name of filing or transcript used]
-        [2] [Exact name of secondary source used]
+        [1] [Exact name of core primary SEC filing or international IR report used]
         """
         try:
             response = client.models.generate_content(model="gemini-2.5-flash", contents=business_phase_prompt, config=config)
-            st.write(response.text)
+            st.markdown(response.text)
         except Exception as e:
-            st.error(f"Error running Business Phase Analysis: {e}")
+            st.error(f"Error executing Business Phase Analysis: {e}")
 
     # ------------------------------------------------------------------
     # 🔴 PROMPT #2: Moat Analysis v3 (Optimized for your tool)
