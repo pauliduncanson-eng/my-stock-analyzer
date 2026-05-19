@@ -421,7 +421,7 @@ if submit_button and ticker:
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
         p8_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specializing in microeconomic moats and structural corporate lifecycles. Your job is to synthesize the data gathered across our research framework for ticker: '{ticker}' (Phase Context: Phase {phase_num}).
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialise the data gathered across our research framework for ticker: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
         
@@ -457,3 +457,10 @@ if submit_button and ticker:
             st.error(f"Error executing Panel 8 Logic Layer: {e}")
 
     st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
+
+# ------------------------------------------------------------------
+# 🔄 RESET RUNTIME CONTROLS
+# ------------------------------------------------------------------
+st.write("---")
+if st.button("🔄 Clear Dashboard & Run New Ticker"):
+    st.rerun()
