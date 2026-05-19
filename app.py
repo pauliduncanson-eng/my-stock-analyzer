@@ -41,7 +41,7 @@ def extract_phase_number(text):
         return match.group(2) if match.group(2) else match.group(3)
     return "3"  # Fallback baseline to Solid Growth if the text doesn't explicitly match
 
-# 4. User Input Interface (Cleaned up: No more manual phase dropdown!)
+# 4. User Input Interface
 with st.form(key="research_panel_form"):
     ticker = st.text_input("Enter Stock Ticker Symbol (e.g., TSLA, ASML, NVDA):", "").strip().upper()
     submit_button = st.form_submit_button(label="🚀 Run Full Framework Audit")
@@ -368,44 +368,44 @@ if submit_button and ticker:
         Step 2: Locate the most recent regulatory filings and consensus data for ticker '{ticker}'.
         Step 3: Execute calculations strictly aligned to Phase parameters: Phase 1 (Forward P/S), Phase 2 (EV/Sales), Phase 3 (P/S & EV/EBITDA), Phase 4 (DCF/Reverse DCF), Phase 5 (Liquidation Asset-Backed valuation).
         Step 4: Output your detailed phase-appropriate valuation layout clearly using markdown metrics. Do not include conversational preambles.
-    # ==================================================================
+        """
+        try:
+            output = generate_analysis_layer(ticker, p7_prompt)
+            st.markdown(output)
+        except Exception as e:
+            st.error(f"Error executing Panel 7: {e}")
+            
+    # ------------------------------------------------------------------
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
-    # ==================================================================
+    # ------------------------------------------------------------------
     
     # 1. Variable Extraction & Standardization
-    # (Note: If your code uses slightly different variable names for phase or risk, 
-    # change the right-hand side here to match your existing variables.)
     try:
-        current_phase = phase_label.strip().lower()       # e.g., "declining", "rapid growth", "startup"
-        risk_level = risk_profile.strip().lower()         # e.g., "high", "moderate", "low"
-        growth_potential = growth_label.strip().lower()   # e.g., "high", "moderate", "low"
-        
-        # Check if market cap is available; defaults to True for small-cap if missing
-        is_small_cap = market_cap < 500_000_000 if 'market_cap' in locals() else True
-    except NameError as ne:
-        # Fallback safeguards if variable names slightly differ in your script
-        st.warning(f"Variable matching notice: {ne}. Defaulting to automated LLM scoring rules.")
+        current_phase = phase_output.strip().lower()       
+        risk_level = output.strip().lower() if 'output' in locals() else "unknown"        
+        growth_potential = output.strip().lower() if 'output' in locals() else "unknown"   
+        is_small_cap = True  # Baseline safeguard for micro-caps
+    except Exception as parse_err:
         current_phase = "unknown"
         risk_level = "unknown"
         growth_potential = "unknown"
         is_small_cap = True
 
     # 2. Strict Deterministic Rules Filter
-    if "declining" in current_phase or "startup" in current_phase:
+    if "declining" in current_phase or "startup" in current_phase or "phase 1" in current_phase or "phase 5" in current_phase:
         calculated_status = "❌ PASS"
         rule_justification = "Company is currently classified within a structural Startup or Declining business phase."
 
-    elif "high" in risk_level and "high" not in growth_potential:
+    elif "high risk" in risk_level and "high" not in growth_potential:
         calculated_status = "❌ PASS"
         rule_justification = "The asset's high risk profile is unmitigated by an elite future growth runway."
 
-    elif "high" not in growth_potential:
-        # Catch-all for moderate/low growth potential which fails your core quality hurdle
+    elif "moderate" in growth_potential or "low" in growth_potential:
         calculated_status = "❌ PASS"
         rule_justification = "Growth potential is moderate or low, failing to meet premium return thresholds."
 
-    elif "rapid" in current_phase or "solid" in current_phase:
-        if is_small_cap and "high" in growth_potential:
+    elif "rapid" in current_phase or "solid" in current_phase or "phase 2" in current_phase or "phase 3" in current_phase:
+        if is_small_cap and ("high" in growth_potential or "accelerating" in growth_potential):
             calculated_status = "🚀 DEEP DIVE ASAP"
             rule_justification = "High-growth small-cap asset operating in a prime Rapid or Solid expansion lifecycle phase."
         else:
@@ -413,7 +413,6 @@ if submit_button and ticker:
             rule_justification = "Solid fundamentals with high growth potential, but lacks the immediate micro-cap velocity required for an instant Deep Dive."
 
     else:
-        # Balanced fallback for companies clearing structural risk filters but missing peak momentum
         calculated_status = "⏳ ADD TO WATCHLIST"
         rule_justification = "Cleared structural risk filters. Placed on watchlist for systematic monitoring."
 
@@ -422,7 +421,7 @@ if submit_button and ticker:
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
         p8_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specializing in microeconomic moats and structural corporate lifecycles. Your job is to synthesize the data gathered across our research framework for ticker: '{ticker}' (Phase: {phase_label if 'phase_label' in locals() else current_phase}).
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specializing in microeconomic moats and structural corporate lifecycles. Your job is to synthesize the data gathered across our research framework for ticker: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
         
@@ -457,12 +456,4 @@ if submit_button and ticker:
         except Exception as e:
             st.error(f"Error executing Panel 8 Logic Layer: {e}")
 
-    st.success("✅ Full Framework Audit complete. Final recommendation engine active.")      
-        """
-        try:
-            output = generate_analysis_layer(ticker, p7_prompt)
-            st.markdown(output)
-        except Exception as e:
-            st.error(f"Error executing Panel 7: {e}")
-            
-    st.success("✅ Audit complete. Dropdown dependency removed and corporate phase linked automatically.")
+    st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
