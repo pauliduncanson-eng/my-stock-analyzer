@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 from google import genai
 from google.genai import types
 
@@ -12,7 +13,6 @@ if "GEMINI_API_KEY" not in st.secrets:
     st.error("Error: GEMINI_API_KEY is missing from your Streamlit Advanced Settings / Secrets.")
     st.stop()
 
-# Cache the client generation resource to avoid creating a new instance on every run
 @st.cache_resource
 def get_gemini_client():
     return genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
@@ -20,7 +20,6 @@ def get_gemini_client():
 client = get_gemini_client()
 
 # 3. Optimized API Call Wrapper with Caching
-# This saves the final markdown text. If the ticker and prompt are identical, it skips the network call.
 @st.cache_data(show_spinner=False)
 def generate_analysis_layer(ticker, prompt_text):
     config = types.GenerateContentConfig(
@@ -34,30 +33,27 @@ def generate_analysis_layer(ticker, prompt_text):
     )
     return response.text
 
-# 4. User Input Interface wrapped in a Form to stop accidental re-runs
+# Helper function to extract the single digit phase number from the model's text output
+def extract_phase_number(text):
+    match = re.search(r'\b(Phase\s*([1-5])|([1-5])\b)', text, re.IGNORECASE)
+    if match:
+        # Return the captured digit
+        return match.group(2) if match.group(2) else match.group(3)
+    return "3"  # Fallback baseline to Solid Growth if the text doesn't explicitly match
+
+# 4. User Input Interface (Cleaned up: No more manual phase dropdown!)
 with st.form(key="research_panel_form"):
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        ticker = st.text_input("Enter Stock Ticker Symbol (e.g., TSLA, ASML, NVDA):", "").strip().upper()
-    with col2:
-        phase_selection = st.selectbox(
-            "Select Business Phase:",
-            ["Phase 1: Startup 💡", "Phase 2: Rapid Growth 🚀", "Phase 3: Solid Growth 📈", "Phase 4: Maturity 🏦", "Phase 5: Decline 📉"]
-        )
-    
-    # The submit button guards the app from running prematurely
+    ticker = st.text_input("Enter Stock Ticker Symbol (e.g., TSLA, ASML, NVDA):", "").strip().upper()
     submit_button = st.form_submit_button(label="🚀 Run Full Framework Audit")
 
-# Extract just the single number character from the dropdown selection string (e.g., "1")
-phase_num = phase_selection.split(":")[0][-1]
-
-# 5. Run Analysis Framework Only Upon Explicit Form Submission
+# 5. Run Analysis Framework Upon Submission
 if submit_button and ticker:
-    st.info(f"Analyzing {ticker}... Pulling primary filings, earnings calls, and processing framework panels.")
+    st.info(f"Analyzing {ticker}... Pulling primary filings, establishing lifecycle phase, and processing framework panels.")
 
     # ------------------------------------------------------------------
-    # 🧭 PANEL #1: Business Phase Analysis
+    # 🧭 PANEL #1: Business Phase Analysis (The Core Foundation)
     # ------------------------------------------------------------------
+    phase_output = ""
     with st.expander("🧭 Business Phase Analysis", expanded=True):
         st.write("*Fetching latest structural lifecycle positioning...*")
         p1_prompt = f"""
@@ -65,10 +61,10 @@ if submit_button and ticker:
         Step 1: Use your Google Search tool to identify today's current date and year.
         Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for ticker '{ticker}'.
         Step 3: Analyze the company's trajectory, revenue patterns, and product maturity. Classify it strictly into one of the following 5 phases: 1. Startup, 2. Rapid Growth, 3. Solid Growth, 4. Maturity, 5. Declining.
-        Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template:
+        Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template. It is vital you include the exact phrase 'Phase X' (where X is 1-5) in your 'Identified Phase' field.
 
         # 🧭 Business Phase Analysis: [Company Name] ({ticker})
-        **Identified Phase:** [Phase Number: Phase Name]
+        **Identified Phase:** Phase [Phase Number]: [Phase Name]
         **Confidence Level:** [High / Medium / Low]
 
         ### 📊 Phase Diagnostic Matrix
@@ -83,10 +79,15 @@ if submit_button and ticker:
         [1] [Exact name of core primary SEC filing or international IR report used]
         """
         try:
-            output = generate_analysis_layer(ticker, p1_prompt)
-            st.markdown(output)
+            phase_output = generate_analysis_layer(ticker, p1_prompt)
+            st.markdown(phase_output)
         except Exception as e:
             st.error(f"Error executing Panel 1: {e}")
+            phase_output = "Phase 3"
+
+    # Automatically determine the phase from the response to route downstream configurations
+    phase_num = extract_phase_number(phase_output)
+    st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
     # ------------------------------------------------------------------
     # 🏰 PANEL #2: Moat Analysis v3
@@ -223,10 +224,10 @@ if submit_button and ticker:
             st.error(f"Error executing Panel 3: {e}")
 
     # ------------------------------------------------------------------
-    # 📊 PANEL #4: Key Metrics Analysis Rev 2.2
+    # 📊 PANEL #4: Key Metrics Analysis Rev 2.2 (Dynamic Routing)
     # ------------------------------------------------------------------
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
-        st.write("*Running automated threshold diagnostic matrices...*")
+        st.write(f"*Running diagnostic metrics customized to automated Phase {phase_num} targets...*")
         p4_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating a company's phase-appropriate metrics using a strict Red/Yellow/Green framework. Target Stock Ticker: '{ticker}'. Target Corporate Phase: '{phase_num}'.
         Step 1: Use your Google Search tool to identify today's current date and year.
@@ -357,10 +358,10 @@ if submit_button and ticker:
             st.error(f"Error executing Panel 6: {e}")
 
     # ------------------------------------------------------------------
-    # 💰 PANEL #7: Business Valuation Analysis
+    # 💰 PANEL #7: Business Valuation Analysis (Dynamic Routing)
     # ------------------------------------------------------------------
     with st.expander("💰 Business Valuation Analysis", expanded=True):
-        st.write("*Running phase-stratified target pricing models...*")
+        st.write(f"*Running automated metrics tailored specifically to Phase {phase_num} parameters...*")
         p7_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert equity analyst applying the appropriate valuation methodology for a company's specific lifecycle business phase using a strict benchmarking framework. Target Stock Ticker: '{ticker}'. Target Corporate Phase: '{phase_num}'.
         Step 1: Use your Google Search tool to identify today's current date and year.
@@ -374,4 +375,4 @@ if submit_button and ticker:
         except Exception as e:
             st.error(f"Error executing Panel 7: {e}")
             
-    st.success("✅ Audit complete. Toggle any section expander freely—data is securely cached locally.")
+    st.success("✅ Audit complete. Dropdown dependency removed and corporate phase linked automatically.")
