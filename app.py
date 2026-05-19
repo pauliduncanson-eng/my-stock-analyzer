@@ -368,6 +368,96 @@ if submit_button and ticker:
         Step 2: Locate the most recent regulatory filings and consensus data for ticker '{ticker}'.
         Step 3: Execute calculations strictly aligned to Phase parameters: Phase 1 (Forward P/S), Phase 2 (EV/Sales), Phase 3 (P/S & EV/EBITDA), Phase 4 (DCF/Reverse DCF), Phase 5 (Liquidation Asset-Backed valuation).
         Step 4: Output your detailed phase-appropriate valuation layout clearly using markdown metrics. Do not include conversational preambles.
+    # ==================================================================
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
+    # ==================================================================
+    
+    # 1. Variable Extraction & Standardization
+    # (Note: If your code uses slightly different variable names for phase or risk, 
+    # change the right-hand side here to match your existing variables.)
+    try:
+        current_phase = phase_label.strip().lower()       # e.g., "declining", "rapid growth", "startup"
+        risk_level = risk_profile.strip().lower()         # e.g., "high", "moderate", "low"
+        growth_potential = growth_label.strip().lower()   # e.g., "high", "moderate", "low"
+        
+        # Check if market cap is available; defaults to True for small-cap if missing
+        is_small_cap = market_cap < 500_000_000 if 'market_cap' in locals() else True
+    except NameError as ne:
+        # Fallback safeguards if variable names slightly differ in your script
+        st.warning(f"Variable matching notice: {ne}. Defaulting to automated LLM scoring rules.")
+        current_phase = "unknown"
+        risk_level = "unknown"
+        growth_potential = "unknown"
+        is_small_cap = True
+
+    # 2. Strict Deterministic Rules Filter
+    if "declining" in current_phase or "startup" in current_phase:
+        calculated_status = "❌ PASS"
+        rule_justification = "Company is currently classified within a structural Startup or Declining business phase."
+
+    elif "high" in risk_level and "high" not in growth_potential:
+        calculated_status = "❌ PASS"
+        rule_justification = "The asset's high risk profile is unmitigated by an elite future growth runway."
+
+    elif "high" not in growth_potential:
+        # Catch-all for moderate/low growth potential which fails your core quality hurdle
+        calculated_status = "❌ PASS"
+        rule_justification = "Growth potential is moderate or low, failing to meet premium return thresholds."
+
+    elif "rapid" in current_phase or "solid" in current_phase:
+        if is_small_cap and "high" in growth_potential:
+            calculated_status = "🚀 DEEP DIVE ASAP"
+            rule_justification = "High-growth small-cap asset operating in a prime Rapid or Solid expansion lifecycle phase."
+        else:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = "Solid fundamentals with high growth potential, but lacks the immediate micro-cap velocity required for an instant Deep Dive."
+
+    else:
+        # Balanced fallback for companies clearing structural risk filters but missing peak momentum
+        calculated_status = "⏳ ADD TO WATCHLIST"
+        rule_justification = "Cleared structural risk filters. Placed on watchlist for systematic monitoring."
+
+    # 3. Panel UI Render & LLM Justification Injection
+    with st.expander("⚖️ Panel #8: Final Investment Decision", expanded=True):
+        st.write("*Synthesizing framework layers into a final allocation recommendation...*")
+        
+        p8_prompt = f"""
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specializing in microeconomic moats and structural corporate lifecycles. Your job is to synthesize the data gathered across our research framework for ticker: '{ticker}' (Phase: {phase_label if 'phase_label' in locals() else current_phase}).
+
+        The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
+        
+        MANDATORY DESIGNATION: {calculated_status}
+        SYSTEM REASONING: {rule_justification}
+
+        You MUST accept this designation. Your role is to write the executive synthesis explaining the qualitative 'Why' behind this decision, utilizing the findings from our individual modules:
+        - MOAT PROFILE: Size and direction of competitive advantages.
+        - GROWTH DYNAMICS: Organic expansion vs. capital efficiency.
+        - KEY PERFORMANCE METRICS: Red/Yellow/Green health signals.
+        - RISK PROFILE: Execution threats and concentration risks.
+
+        Generate your final executive summary using the exact template below. Do not add any conversational preambles:
+
+        # ⚖️ Strategic Allocation Summary: {ticker}
+        **Final Framework Recommendation:** {calculated_status}
+        **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
+
+        ### 📋 Core Synthesis Matrix
+        - **Moat & Growth Alignment:** [1-2 sentences explaining how the moat protects or fails to protect this specific growth lifecycle.]
+        - **Financial Health vs. Valuation:** [1-2 sentences balancing the balance sheet against the current trading multiple.]
+        - **Execution Risk Friction:** [1-2 sentences detailing the primary threat that validates our risk rating.]
+
+        ### 🛠️ Required Next Steps
+        - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
+        - **Trigger Condition:** [Define a clear operational or valuation trigger to either archive, monitor, or buy this stock.]
+        """
+        
+        try:
+            final_decision = generate_analysis_layer(ticker, p8_prompt)
+            st.markdown(final_decision)
+        except Exception as e:
+            st.error(f"Error executing Panel 8 Logic Layer: {e}")
+
+    st.success("✅ Full Framework Audit complete. Final recommendation engine active.")      
         """
         try:
             output = generate_analysis_layer(ticker, p7_prompt)
