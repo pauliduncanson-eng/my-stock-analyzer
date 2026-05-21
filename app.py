@@ -1,7 +1,9 @@
 import streamlit as st
 import re
+import time
 from google import genai
 from google.genai import types
+from google.genai.errors import APIError
 
 # 1. Page Configuration & Styling
 st.set_page_config(page_title="Equity Research Analyzer", layout="wide")
@@ -19,19 +21,44 @@ def get_gemini_client():
 
 client = get_gemini_client()
 
-# 3. Optimized API Call Wrapper with Caching
+# 3. Optimized API Call Wrapper with Caching, Backoff Retries, and Model Fallbacks
 @st.cache_data(show_spinner=False)
 def generate_analysis_layer(ticker, prompt_text):
     config = types.GenerateContentConfig(
         tools=[{"google_search": {}}],
         temperature=0.2,
     )
-    response = client.models.generate_content(
-        model="gemini-2.5-flash", 
-        contents=prompt_text, 
-        config=config
-    )
-    return response.text
+    
+    # Try the high-speed flash model first, fallback to pro if the flash pool is congested
+    models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
+    max_retries = 3
+    
+    for model_name in models_to_try:
+        retries = 0
+        while retries < max_retries:
+            try:
+                response = client.models.generate_content(
+                    model=model_name, 
+                    contents=prompt_text, 
+                    config=config
+                )
+                return response.text
+                
+            except APIError as e:
+                # Catch 503 (High Demand/Unavailable) or 429 (Rate Limits)
+                if e.code in [503, 429]:
+                    retries += 1
+                    if retries < max_retries:
+                        # Exponential backoff sleep: 2s, 4s, 8s
+                        sleep_time = 2 ** retries 
+                        time.sleep(sleep_time)
+                        continue
+                break
+            except Exception:
+                break
+                
+    # Ultimate exception fallback if both model infrastructure layers fail to respond
+    raise RuntimeError("All upstream analysis engines are currently rate-limited or overloaded by Google. Please wait a moment and try again.")
 
 # Helper function to extract the single digit phase number from the model's text output
 def extract_phase_number(text):
@@ -47,12 +74,11 @@ with st.form(key="research_panel_form"):
 
 # 5. Run Analysis Framework Upon Submission
 if submit_button and ticker:
-    st.info(f"Analyzing {ticker}... Pulling primary filings and processing framework panels in optimized macro-batches.")
+    st.info(f"Analyzing {ticker}... Pulling primary filings, establishing lifecycle phase, and processing framework panels.")
 
     # ==================================================================
     # 🧭 BATCH 1: Business Phase Analysis (The Core Foundation)
     # ==================================================================
-    # Kept separate because Panel 4, 7, and 8 rely on this structural baseline number.
     phase_output = ""
     with st.expander("🧭 Business Phase Analysis", expanded=True):
         st.write("*Fetching latest structural lifecycle positioning...*")
@@ -92,16 +118,13 @@ if submit_button and ticker:
     # ==================================================================
     # 🏎️ BATCH 2: Core Analysis Macro-Prompt (Moat, Growth, Risks, & Financials)
     # ==================================================================
-    # CRITICAL OPTIMIZATION: We bundle Panels 2, 3, 5, and 6 into ONE web-search call.
-    # This prevents 4 distinct network-heavy lookups and protects your server capacity.
-    
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
         macro_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are a elite hedge fund research engine. Perform a comprehensive analysis on target stock ticker: '{ticker}'.
+        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine. Perform a comprehensive analysis on target stock ticker: '{ticker}'.
         Step 1: Use your Google Search tool to find today's current date/year.
         Step 2: Source recent SEC EDGAR filings (10-K, 10-Q, 1A Risk Factors) and earnings call transcripts.
-        Step 3: Generate the full analysis using the exact demarcated templates below. Separated components with the clear marker '---'. Do not include any conversational intro or outro.
+        Step 3: Generate the full analysis using the exact demarcated templates below. Separate components with the clear marker '---'. Do not include any conversational intro or outro.
 
         === PANEL_2_START ===
         # 🏰 MOAT ANALYSIS: [Company Name] ({ticker})
@@ -222,7 +245,7 @@ if submit_button and ticker:
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===")
 
-    # Layout Design: Display Moat & Growth side-by-side to optimize scannability
+    # Layout Design: Side-by-Side Panels for better space efficiency
     col1, col2 = st.columns(2)
     with col1:
         with st.expander("🏰 Moat Analysis v3", expanded=True):
@@ -231,7 +254,6 @@ if submit_button and ticker:
         with st.expander("🚀 Business Growth Analysis v2.2", expanded=True):
             st.markdown(p3_output)
 
-    # Layout Design: Display Risks & Financial Health side-by-side
     col3, col4 = st.columns(2)
     with col3:
         with st.expander("⚠️ Business Risk Analysis v2.0", expanded=True):
@@ -239,7 +261,6 @@ if submit_button and ticker:
     with col4:
         with st.expander("📊 Financial Statement Analysis v1.1", expanded=True):
             st.markdown(p6_output)
-
 
     # ==================================================================
     # 📈 BATCH 3: Dynamic Metrics & Valuation Layer (Panels 4 & 7 Combined)
@@ -250,7 +271,7 @@ if submit_button and ticker:
         metrics_valuation_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for ticker: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
         Step 1: Calculate core metrics and valuation models explicitly matching Phase {phase_num} methodologies.
-        Step 2: Generate output using the exact layout below. Separated blocks with '---'. Do not add conversational intro text.
+        Step 2: Generate output using the exact layout below. Separate blocks with '---'. Do not add conversational intro text.
 
         === PANEL_4_START ===
         ### 📊 Phase {phase_num} Core Diagnostic Benchmarking
@@ -285,17 +306,16 @@ if submit_button and ticker:
     with st.expander("💰 Business Valuation Analysis", expanded=True):
         st.markdown(p7_output)
 
-
     # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
     # ==================================================================
-    # 1. Variable Extraction & Standardization (Fixed the variable bug here)
+    # 1. Variable Extraction & Standardization
     try:
         current_phase = phase_output.strip().lower()       
         risk_level = p5_output.strip().lower()        
         growth_potential = p3_output.strip().lower()   
-        is_small_cap = True  # Baseline safeguard for micro-caps
-    except Exception as parse_err:
+        is_small_cap = True  
+    except Exception:
         current_phase = "unknown"
         risk_level = "unknown"
         growth_potential = "unknown"
