@@ -105,7 +105,7 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
 
     return text
 
-# 4. Refreshed User Input Interface
+# 4. User Input Interface
 with st.form(key="research_panel_form"):
     ticker = st.text_input(
         "Add ticker to run stock analysis:", 
@@ -125,7 +125,7 @@ if submit_button and ticker:
     st.info(f"Analyzing {ticker}... Pulling primary filings, establishing lifecycle phase, and processing framework panels.")
 
     # ==================================================================
-    # 🧭 BATCH 1: Business Phase Analysis
+    # 🧭 BATCH 1: Business Phase Analysis (Font size updated for Identified Phase)
     # ==================================================================
     phase_output = ""
     with st.expander("🧭 Business Phase Analysis", expanded=True):
@@ -138,7 +138,9 @@ if submit_button and ticker:
         Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template. It is vital you include the exact phrase 'Phase X' (where X is 1-5) in your 'Identified Phase' field.
 
         # 🧭 Business Phase Analysis: [Company Name] ({ticker})
-        **Identified Phase:** Phase [Phase Number]: [Phase Name]
+        
+        ### Identified Phase: Phase [Phase Number] - [Phase Name]
+        
         **Confidence Level:** [High / Medium / Low]
 
         ### 📊 Phase Diagnostic Matrix
@@ -163,7 +165,7 @@ if submit_button and ticker:
     st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
     # ==================================================================
-    # 🏎️ BATCH 2: Core Analysis Macro-Prompt (Moat, Growth, Risks, & Financials)
+    # 🏎️ BATCH 2: Core Analysis Macro-Prompt (Moat & Growth Styling tweaks applied)
     # ==================================================================
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
@@ -175,9 +177,12 @@ if submit_button and ticker:
 
         === PANEL_2_START ===
         # 🏰 MOAT ANALYSIS: [Company Name] ({ticker})
-        **Moat size:** [Select one: None ❌, Narrow ➖, Moderate ⚖️, Wide ✅]
-        **Moat direction:** [Select one: Widening ✅ / Stable ➖ / Narrowing ❌]
+        
+        <h4 style='margin-bottom: 0px;'>Moat size: [Select one: None ❌, Narrow ➖, Moderate ⚖️, Wide ✅]</h4>
+        <h4 style='margin-top: 5px; margin-bottom: 20px;'>Moat direction: [Select one: Widening ✅ / Stable ➖ / Narrowing ❌]</h4>
+
         **Primary moat sources:** [List the 1-2 most dominant moat sources]
+
         **Summary:** [Provide a 1-2 sentence summary of the Moat thesis, supported by a key metric citation.]
 
         ## 👥 NETWORK EFFECT
@@ -196,8 +201,10 @@ if submit_button and ticker:
 
         === PANEL_3_START ===
         # 🚀 Future Growth Analysis: [Company Name] ({ticker}) 
-        **Growth Potential:** [Select one: High ✅ / Moderate ➖ / Low ❌] 
-        **Growth Direction:** [Select one: Accelerating ✅ / Stable ➖ / Decelerating ❌] 
+        
+        ### Future Growth Potential: [Select one: High ✅ / Moderate ➖ / Low ❌]
+        ### Future Growth Direction: [Select one: Accelerating ✅ / Stable ➖ / Decelerating ❌]
+        
         **Evidence Summary:** [1–2 sentence narrative supported by a defining corporate growth metric citation.] 
 
         ## 🌍 Market Expansion
@@ -267,7 +274,7 @@ if submit_button and ticker:
     col1, col2 = st.columns(2)
     with col1:
         with st.expander("🏰 Moat Analysis v3", expanded=True):
-            st.markdown(p2_output)
+            st.markdown(p2_output, unsafe_allow_html=True)
     with col2:
         with st.expander("🚀 Business Growth Analysis v2.2", expanded=True):
             st.markdown(p3_output)
