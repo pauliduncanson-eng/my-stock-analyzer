@@ -114,9 +114,20 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
 
     return text
 
-# 4. User Input Interface
+# 4. User Input Interface (Updated for European Assets & Company Names)
 with st.form(key="research_panel_form"):
-    ticker = st.text_input("Enter Stock Ticker Symbol (e.g., TSLA, ASML, NVDA):", "").strip().upper()
+    st.markdown("##### 🔍 Asset Selection")
+    ticker = st.text_input(
+        "Enter Company Name or Ticker Symbol:", 
+        placeholder="e.g., Robot S.A., ASML, or EPA:OR"
+    )
+    
+    # Clear, low-friction help text for European local listings
+    st.caption(
+        "💡 **Tip for European listings:** To ensure perfect data collection, provide the **full company name** "
+        "or use the format from Google Finance (e.g., *EBR:UCB* for UCB or *AMS:ASML* for ASML)."
+    )
+    
     submit_button = st.form_submit_button(label="🚀 Run Full Framework Audit")
 
 # 5. Run Analysis Framework Upon Submission
@@ -130,9 +141,9 @@ if submit_button and ticker:
     with st.expander("🧭 Business Phase Analysis", expanded=True):
         st.write("*Fetching latest structural lifecycle positioning...*")
         p1_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are a World-Class Strategic Analyst specialising in Business Lifecycle and Phase Identification. Your target stock ticker is: '{ticker}'. 
+        CRITICAL OPERATIONAL INSTRUCTION: You are a World-Class Strategic Analyst specialising in Business Lifecycle and Phase Identification. Your target stock identifier/company name is: '{ticker}'. 
         Step 1: Use your Google Search tool to identify today's current date and year.
-        Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for ticker '{ticker}'.
+        Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for target '{ticker}'.
         Step 3: Analyze the company's trajectory, revenue patterns, and product maturity. Classify it strictly into one of the following 5 phases: 1. Startup, 2. Rapid Growth, 3. Solid Growth, 4. Maturity, 5. Declining.
         Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template. It is vital you include the exact phrase 'Phase X' (where X is 1-5) in your 'Identified Phase' field.
 
@@ -168,9 +179,9 @@ if submit_button and ticker:
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
         macro_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine. Perform a comprehensive analysis on target stock ticker: '{ticker}'.
+        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine. Perform a comprehensive analysis on target stock identifier/company name: '{ticker}'.
         Step 1: Use your Google Search tool to find today's current date/year.
-        Step 2: Source recent SEC EDGAR filings (10-K, 10-Q, 1A Risk Factors) and earnings call transcripts.
+        Step 2: Source recent regulatory filings (SEC EDGAR, European company registries, or investor relations centers) and earnings call transcripts.
         Step 3: Generate the full analysis using the exact demarcated templates below. Separate components with the clear marker '---'. Do not include any conversational intro or outro.
 
         === PANEL_2_START ===
@@ -311,9 +322,9 @@ if submit_button and ticker:
     p7_output = ""
     with st.spinner(f"🔢 Running valuation math specifically targeted to Phase {phase_num}..."):
         metrics_valuation_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for ticker: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
+        CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for target: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
         Step 1: Use your Google Search tool to find today's current date and year.
-        Step 2: Source recent SEC EDGAR filings (10-Q/10-K) or international IR Annual Reports/investor presentations if non-US. Gather current share price, diluted share count, cash, debt, and consensus NTM (next-twelve-month) metrics. Calculate EV = Market Cap + Debt - Cash.
+        Step 2: Source recent filings (10-Q/10-K or international IR Annual Reports/investor presentations if non-US). Gather current share price, diluted share count, cash, debt, and consensus NTM (next-twelve-month) metrics. Calculate EV = Market Cap + Debt - Cash. Ensure currency consistency (e.g. convert to Euros if analyzing European operations).
         Step 3: Execute valuation models explicitly matching the Phase {phase_num} methodologies and industry overrides below.
         Step 4: Generate output using the exact layout below. Separate blocks with '---'. Do not add conversational intro text.
 
@@ -360,7 +371,7 @@ if submit_button and ticker:
         - **Sensitivity:** [Key assumptions that shift this valuation stance]
 
         ## 📎 Sources
-        [1] Source Name (10-Q/10-K/IR Report)
+        [1] Source Name (Filing/IR Report)
         [2] Source Name (Market Data/Consensus/Peer Medians)
         === PANEL_7_END ===
         """
@@ -424,7 +435,7 @@ if submit_button and ticker:
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
         p8_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialise the data gathered across our research framework for ticker: '{ticker}' (Phase Context: Phase {phase_num}).
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialise the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
         
@@ -448,10 +459,14 @@ if submit_button and ticker:
            - **Core Investment Thesis:** Diagnose clearly whether the rejection is due to being too systemically or structurally risky (e.g., concentration issues, balance sheet distress) OR due to simply not being good enough from an expansion standpoint (e.g., stagnant revenue profiles, flatlining markets, weak phase dynamics).
            - **Key Risks to Identify:** Articulate the precise toxic flaw, cyclical decline mechanism, or competitive erosion hurdle that breaks the potential upside entirely.
 
-        Output ONLY the markdown format below. Ensure the layout matches perfectly, using the blockquote mark (>) on the final recommendation line so that it stands out dramatically for the user.
+        Output ONLY the markdown format below. Ensure the layout matches perfectly. Use the specific HTML structure provided below for the Final Recommendation to make it pop out with massive text and clear separation.
 
         # ⚖️ Assessment Summary: {ticker}
-        > **Final Recommendation:** {calculated_status}
+        <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-left: 5px solid #ff4b4b; border-radius: 4px; margin: 15px 0;">
+            <h2 style="margin: 0; padding: 0; font-size: 28px; font-weight: 800; letter-spacing: 0.5px;">
+                Final Recommendation: {calculated_status}
+            </h2>
+        </div>
 
         **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
@@ -465,10 +480,11 @@ if submit_button and ticker:
         """
         try:
             final_decision = generate_analysis_layer(ticker, p8_prompt)
-            st.markdown(final_decision)
+            st.markdown(final_decision, unsafe_allow_html=True)
         except Exception as e:
             st.error(f"Error executing Panel 8 Logic Layer: {e}")
 
+    st.close()
     st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
 
 # ------------------------------------------------------------------
