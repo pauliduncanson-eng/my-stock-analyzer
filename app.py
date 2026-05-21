@@ -120,12 +120,11 @@ with st.form(key="research_panel_form"):
     )
     
     st.markdown(
-        "Enter both the company name and the ticker symbol and provide a suitable example. "
-        "To ensure perfect data collection provide the full company name and the ticker symbol "
+        "Enter both the company name and the ticker symbol "
         "according to Google Finance (e.g., *Robot S.A. EPA:ALROB* or *Archos SA EPA:ALJAC*)."
     )
     
-    submit_button = st.form_submit_button(label="🚀 Run Full Framework Audit")
+    submit_button = st.form_submit_button(label="Run the analysis")
 
 # 5. Run Analysis Framework Upon Submission
 if submit_button and ticker:
