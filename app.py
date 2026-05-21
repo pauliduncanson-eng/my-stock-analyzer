@@ -29,7 +29,6 @@ def generate_analysis_layer(ticker, prompt_text):
         temperature=0.2,
     )
     
-    # Try the high-speed flash model first, fallback to pro if the flash pool is congested
     models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
     max_retries = 3
     
@@ -50,11 +49,9 @@ def generate_analysis_layer(ticker, prompt_text):
                     continue
                 
             except APIError as e:
-                # Catch 503 (High Demand/Unavailable) or 429 (Rate Limits)
                 if e.code in [503, 429]:
                     retries += 1
                     if retries < max_retries:
-                        # Exponential backoff sleep: 2s, 4s, 8s
                         sleep_time = 2 ** retries 
                         time.sleep(sleep_time)
                         continue
@@ -62,7 +59,6 @@ def generate_analysis_layer(ticker, prompt_text):
             except Exception:
                 break
                 
-    # Ultimate exception fallback if both model infrastructure layers fail to respond
     raise RuntimeError("All upstream analysis engines are currently rate-limited or overloaded by Google. Please wait a moment and try again.")
 
 # Helper function to extract the single digit phase number from the model's text output
@@ -72,24 +68,21 @@ def extract_phase_number(text):
     match = re.search(r'\b(Phase\s*([1-5])|([1-5])\b)', text, re.IGNORECASE)
     if match:
         return match.group(2) if match.group(2) else match.group(3)
-    return "3"  # Fallback baseline to Solid Growth if the text doesn't explicitly match
+    return "3"
 
 # Robust Smart Parsing Engine to capture data under any formatting variance
 def parse_panel(text, start_tag, end_tag, fallback_header=None):
     if not text or not isinstance(text, str):
         return "⚠️ *Analysis data temporarily unavailable. Please rerun.*"
     
-    # Clean up tags for matching flexibility
     clean_start = start_tag.replace("=", "").strip()
     clean_end = end_tag.replace("=", "").strip()
     
-    # Strategy 1: Exact Match Pattern
     pattern = f"{re.escape(start_tag)}(.*?){re.escape(end_tag)}"
     match = re.search(pattern, text, re.DOTALL)
     if match:
         return match.group(1).strip()
         
-    # Strategy 2: Fuzzy/Lenient Tag Matching (handles missing equals signs, casing changes)
     fuzzy_start = clean_start.replace("_", r"[\s_]*")
     fuzzy_end = clean_end.replace("_", r"[\s_]*")
     fuzzy_pattern = f"(?:===\s*)?{fuzzy_start}(?:\s*===)?(.*?)(?:===\s*)?{fuzzy_end}(?:\s*===)?"
@@ -97,14 +90,12 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
     if fuzzy_match:
         return fuzzy_match.group(1).strip()
         
-    # Strategy 3: Header-Based Splitting Fallback
     if fallback_header:
         header_pattern = f"({re.escape(fallback_header)}.*?)(?=\n###|\n===\s*PANEL|\Z)"
         header_match = re.search(header_pattern, text, re.DOTALL | re.IGNORECASE)
         if header_match:
             return header_match.group(1).strip()
             
-    # Strategy 4: Raw Text Chunking Fallback (If structural tags failed entirely)
     if "PANEL_4" in start_tag or "PANEL_2" in start_tag:
         split_point = len(text) // 2
         return text[:split_point].strip() + "\n\n*(Note: Data recovered via structural backup layout parser)*"
@@ -114,17 +105,17 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
 
     return text
 
-# 4. User Input Interface (With European Assets & Company Names support)
+# 4. Refreshed User Input Interface
 with st.form(key="research_panel_form"):
-    st.markdown("##### 🔍 Asset Selection")
     ticker = st.text_input(
-        "Enter Company Name or Ticker Symbol:", 
-        placeholder="e.g., Robot S.A., ASML, or EPA:OR"
+        "Add ticker to run stock analysis:", 
+        placeholder="e.g., Robot S.A. (EPA:ALROB)"
     )
     
-    st.caption(
-        "💡 **Tip for European listings:** To ensure perfect data collection, provide the **full company name** "
-        "or use the format from Google Finance (e.g., *EBR:UCB* for UCB or *AMS:ASML* for ASML)."
+    st.markdown(
+        "Enter both the company name and the ticker symbol and provide a suitable example. "
+        "To ensure perfect data collection provide the full company name and the ticker symbol "
+        "according to Google Finance (e.g., *Robot S.A. EPA:ALROB* or *Archos SA EPA:ALJAC*)."
     )
     
     submit_button = st.form_submit_button(label="🚀 Run Full Framework Audit")
@@ -134,7 +125,7 @@ if submit_button and ticker:
     st.info(f"Analyzing {ticker}... Pulling primary filings, establishing lifecycle phase, and processing framework panels.")
 
     # ==================================================================
-    # 🧭 BATCH 1: Business Phase Analysis (The Core Foundation)
+    # 🧭 BATCH 1: Business Phase Analysis
     # ==================================================================
     phase_output = ""
     with st.expander("🧭 Business Phase Analysis", expanded=True):
@@ -168,7 +159,6 @@ if submit_button and ticker:
             st.error(f"Error executing Panel 1: {e}")
             phase_output = "Phase 3"
 
-    # Automatically determine the phase from the response to route downstream configurations
     phase_num = extract_phase_number(phase_output)
     st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
@@ -274,7 +264,6 @@ if submit_button and ticker:
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
 
-    # Layout Design: Side-by-Side Panels for better space efficiency
     col1, col2 = st.columns(2)
     with col1:
         with st.expander("🏰 Moat Analysis v3", expanded=True):
@@ -311,7 +300,7 @@ if submit_button and ticker:
         - **Phase 4 (Maturity):** Primary: Discounted Cash Flow (DCF) (5-10yr explicit + perpetuity). Secondary: FWD P/E.
         - **Phase 5 (Declining):** Primary: Sum-of-the-Parts (SOTP) / Net Asset Value (NAV). Secondary: Reverse DCF / Liquidation Value / Dividend Yield vs Risk-Free Rate.
 
-        ### INDUSTRY / ASSAY-SPECIFIC OVERRIDES (Apply if company matches industry)
+        ### INDUSTRY / ASSAY-SPECIFIC OVERRIDES
         - **Biotech / Life Sciences:** Probability-adjusted NPV (pNPV) of clinical pipeline using success probabilities. EV/Peak Sales. Green if Market Cap <= 0.7x pNPV; Yellow 0.7-1.3x; Red >= 1.3x.
         - **SaaS / Software:** Apply Rule of 40 (Growth % + FCF %). Evaluate EV/Gross Profit, FWD P/S, and Net Dollar Retention.
         - **Energy / Mining:** Net Asset Value (NAV/NPV) of reserves, SOTP by asset tier, EV/Reserves.
@@ -372,7 +361,6 @@ if submit_button and ticker:
     # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
     # ==================================================================
-    # 1. Variable Extraction & Standardization
     try:
         current_phase = phase_output.strip().lower() if phase_output else "unknown"       
         risk_level = p5_output.strip().lower()        
@@ -384,7 +372,6 @@ if submit_button and ticker:
         growth_potential = "unknown"
         is_small_cap = True
 
-    # 2. Strict Deterministic Rules Filter
     if "declining" in current_phase or "startup" in current_phase or "phase 1" in current_phase or "phase 5" in current_phase:
         calculated_status = "❌ PASS"
         rule_justification = "Company is currently classified within a structural Startup or Declining business phase."
@@ -409,7 +396,6 @@ if submit_button and ticker:
         calculated_status = "⏳ ADD TO WATCHLIST"
         rule_justification = "Cleared structural risk filters. Placed on watchlist for systematic monitoring."
 
-    # 3. Panel UI Render & LLM Justification Injection
     with st.expander("⚖️ Panel #8: Final Investment Decision", expanded=True):
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
