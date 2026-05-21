@@ -114,7 +114,7 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
 
     return text
 
-# 4. User Input Interface (Updated for European Assets & Company Names)
+# 4. User Input Interface (With European Assets & Company Names support)
 with st.form(key="research_panel_form"):
     st.markdown("##### 🔍 Asset Selection")
     ticker = st.text_input(
@@ -122,7 +122,6 @@ with st.form(key="research_panel_form"):
         placeholder="e.g., Robot S.A., ASML, or EPA:OR"
     )
     
-    # Clear, low-friction help text for European local listings
     st.caption(
         "💡 **Tip for European listings:** To ensure perfect data collection, provide the **full company name** "
         "or use the format from Google Finance (e.g., *EBR:UCB* for UCB or *AMS:ASML* for ASML)."
@@ -193,23 +192,14 @@ if submit_button and ticker:
 
         ## 👥 NETWORK EFFECT
         **Assessment:** [Present ✅ / Not Present ❌]
-        **Analysis:** [Provide reasoning for your network effect assessment.]
-
         ## ⚓ SWITCHING COSTS
         **Assessment:** [Present ✅ / Not Present ❌]
-        **Analysis:** [Provide reasoning for your switching costs assessment.]
-
         ## 🏭 LOW-COST PRODUCTION
         **Assessment:** [Present ✅ / Not Present ❌]
-        **Analysis:** [Provide reasoning for your low-cost production assessment.]
-
         ## 🚀 COUNTER POSITIONING
         **Assessment:** [Present ✅ / Not Present ❌]
-        **Analysis:** [Provide reasoning for your counter positioning assessment.]
-
         ## 🏆 INTANGIBLE ASSETS
         **Assessment:** [Present ✅ / Not Present ❌]
-        **Analysis:** [Provide reasoning for your intangible assets assessment.]
         === PANEL_2_END ===
 
         ---
@@ -222,19 +212,12 @@ if submit_button and ticker:
 
         ## 🌍 Market Expansion
         **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
-        **Evidence:** [Data-driven narrative.] 
-
         ## 🧪 Product Innovation
         **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
-        **Evidence:** [Data-driven narrative.] 
-
         ## 🤖 Technology Adoption
         **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
-        **Evidence:** [Data-driven narrative.] 
-
         ## ⚖️ Regulatory Tailwinds
         **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
-        **Evidence:** [Data-driven narrative.] 
         === PANEL_3_END ===
 
         ---
@@ -249,19 +232,12 @@ if submit_button and ticker:
         ## 🎯 RISK ASSESSMENT DETAILS
         ### 🥚🧺 Concentration
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
-        - **Evidence:** [1 concise bullet point with inline filing citation]
-        
         ### 🥷 Disruption
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
-        - **Evidence:** [...]
-
         ### 🕵️ Outside Forces
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
-        - **Evidence:** [...]
-
         ### 👥 Competition
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
-        - **Evidence:** [...]
         === PANEL_5_END ===
 
         ---
@@ -273,7 +249,7 @@ if submit_button and ticker:
         
         ## 🔍 Detailed Analysis 
         ### 📋 Income Statement
-        - **Revenue Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢] | *Evidence:* [Brief text with citation]
+        - **Revenue Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
         - **Gross Profit Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
         - **Operating Income Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
         - **EPS Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
@@ -342,12 +318,15 @@ if submit_button and ticker:
         - **Bitcoin / Crypto Treasury Companies:** Determine current market Net Asset Value (mNAV) and benchmark to peers.
 
         ### BENCHMARK COLOR RULES
-        - 🟩 Green (Undervalued): Multiple <= peer 25th percentile OR <= company's own 3-year low. (Or unique industry tier match).
-        - 🟨 Yellow (Within Normal Range / Fairly Valued): Multiple between peer 25th and 75th percentile.
-        - 🟥 Red (Overvalued): Multiple >= peer 75th percentile OR >= company's 3-year high.
+        - 🟩 Green (Undervalued / Strong): Multiple <= peer 25th percentile OR <= company's own 3-year low.
+        - 🟨 Yellow (Within Normal Range / Fair): Multiple between peer 25th and 75th percentile.
+        - 🟥 Red (Overvalued / Weak): Multiple >= peer 75th percentile OR >= company's 3-year high.
 
         === PANEL_4_START ===
         ### 📊 Phase {phase_num} Core Diagnostic Benchmarking
+
+        **Diagnostic Summary Score:** [MANDATORY MATHEMATICAL SYNTHESIS: Assign points to the 5 rows below: 🟢=2 pts, 🟡=1 pt, 🔴=0 pts. Sum the points (Max 10). If total points are >= 7, output "Strong 🟢". If 3-6 points, output "Moderate 🟡". If <= 2 points, output "Weak 🔴". Show the mathematical total, e.g., "Moderate 🟡 (5/10 points)"]
+
         | Metric Found | Actual Calculated Value | Benchmark Status (🔴/🟡/🟢) |
         | :--- | :--- | :--- |
         | Revenue Growth / Profile | [Value] | [🔴/🟡/🟢] |
@@ -484,7 +463,6 @@ if submit_button and ticker:
         except Exception as e:
             st.error(f"Error executing Panel 8 Logic Layer: {e}")
 
-    st.close()
     st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
 
 # ------------------------------------------------------------------
