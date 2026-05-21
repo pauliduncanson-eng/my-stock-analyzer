@@ -7,7 +7,7 @@ from google.genai.errors import APIError
 
 # 1. Page Configuration & Styling
 st.set_page_config(page_title="Equity Research Analyzer", layout="wide")
-st.title("📊 Custom Equity Research Dashboard")
+st.title("💎European Hidden Gems Research Dashboard💎")
 st.subheader("Run your proprietary investment framework instantly")
 
 # 2. Securely Initialize Gemini Client
