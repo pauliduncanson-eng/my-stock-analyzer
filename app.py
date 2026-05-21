@@ -105,6 +105,13 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
 
     return text
 
+# Helper function to scan panels for loose keyword groupings/synonyms
+def contains_any(text, keywords):
+    if not text:
+        return False
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in keywords)
+
 # 4. User Input Interface
 with st.form(key="research_panel_form"):
     ticker = st.text_input(
@@ -132,7 +139,7 @@ if submit_button and ticker:
         st.write("*Fetching latest structural lifecycle positioning...*")
         p1_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are a World-Class Strategic Analyst specialising in Business Lifecycle and Phase Identification. Your target stock identifier/company name is: '{ticker}'. 
-        Step 1: Use your Google Search tool to identify today's current date and year.
+        Step 1: Use your Google Search tool to identify today's current date and year (2026).
         Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for target '{ticker}'.
         Step 3: Analyze the company's trajectory, revenue patterns, and product maturity. Classify it strictly into one of the following 5 phases: 1. Startup, 2. Rapid Growth, 3. Solid Growth, 4. Maturity, 5. Declining.
         Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template. It is vital you include the exact phrase 'Phase X' (where X is 1-5) in your 'Identified Phase' field.
@@ -165,13 +172,13 @@ if submit_button and ticker:
     st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
     # ==================================================================
-    # 🏎️ BATCH 2: Core Analysis Macro-Prompt (Moat & Growth Layout Updates)
+    # 🏎️ BATCH 2: Core Analysis Macro-Prompt
     # ==================================================================
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
         macro_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine. Perform a comprehensive analysis on target stock identifier/company name: '{ticker}'.
-        Step 1: Use your Google Search tool to find today's current date/year.
+        Step 1: Use your Google Search tool to find today's current date/year (2026).
         Step 2: Source recent regulatory filings (SEC EDGAR, European company registries, or investor relations centers) and earnings call transcripts.
         Step 3: Generate the full analysis using the exact demarcated templates below. Separate components with the clear marker '---'. Do not include any conversational intro or outro.
 
@@ -242,7 +249,7 @@ if submit_button and ticker:
         === PANEL_6_START ===
         # 📊 Financial Health Analysis: [Company Name] ({ticker})
         ## ✅ Overall Summary
-        - **Overall Financial Health:** [Strong / Moderate / Weak]
+        - **Overall Financial Health:** [Strong / Moderate / Weak / Okay]
         
         ## 🔍 Detailed Analysis 
         ### 📋 Income Statement
@@ -288,14 +295,14 @@ if submit_button and ticker:
             st.markdown(p6_output)
 
     # ==================================================================
-    # 📈 BATCH 3: Dynamic Metrics & Valuation Layer (Panels 4 & 7 Combined)
+    # 📈 BATCH 3: Dynamic Metrics & Valuation Layer
     # ==================================================================
     p4_output = ""
     p7_output = ""
     with st.spinner(f"🔢 Running valuation math specifically targeted to Phase {phase_num}..."):
         metrics_valuation_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for target: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
-        Step 1: Use your Google Search tool to find today's current date and year.
+        Step 1: Use your Google Search tool to find today's current date and year (2026).
         Step 2: Source recent filings (10-Q/10-K or international IR Annual Reports/investor presentations if non-US). Gather current share price, diluted share count, cash, debt, and consensus NTM (next-twelve-month) metrics. Calculate EV = Market Cap + Debt - Cash. Ensure currency consistency (e.g. convert to Euros if analyzing European operations).
         Step 3: Execute valuation models explicitly matching the Phase {phase_num} methodologies and industry overrides below.
         Step 4: Generate output using the exact layout below. Separate blocks with '---'. Do not add conversational intro text.
@@ -304,7 +311,7 @@ if submit_button and ticker:
         - **Phase 1 (Startup):** Primary: FWD P/S (Guidance/Consensus). Secondary: P/GP. Peer set comparison.
         - **Phase 2 (Rapid Growth):** Primary: EV/Sales. Secondary: FWD P/S.
         - **Phase 3 (Solid Growth):** Primary: P/Sales. Secondary: EV/EBITDA (NTM).
-        - **Phase 4 (Maturity):** Primary: Discounted Cash Flow (DCF) (5-10yr explicit + perpetuity). Secondary: FWD P/E.
+        - **Phase 4 (Maturity):** Primary: Discounted Cash Flow (DCF) (5-10yr explicit + perpetuity). Secondary: FWD P/E. Must state clearly if it is 'Undervalued', 'Fairly Valued', or 'Overvalued'.
         - **Phase 5 (Declining):** Primary: Sum-of-the-Parts (SOTP) / Net Asset Value (NAV). Secondary: Reverse DCF / Liquidation Value / Dividend Yield vs Risk-Free Rate.
 
         ### INDUSTRY / ASSAY-SPECIFIC OVERRIDES
@@ -321,7 +328,7 @@ if submit_button and ticker:
         === PANEL_4_START ===
         ### 📊 Phase {phase_num} Core Diagnostic Benchmarking
 
-        **Diagnostic Summary Score:** [MANDATORY MATHEMATICAL SYNTHESIS: Assign points to the 5 rows below: 🟢=2 pts, 🟡=1 pt, 🔴=0 pts. Sum the points (Max 10). If total points are >= 7, output "Strong 🟢". If 3-6 points, output "Moderate 🟡". If <= 2 points, output "Weak 🔴". Show the mathematical total, e.g., "Moderate 🟡 (5/10 points)"]
+        **Diagnostic Summary Score:** [MANDATORY MATHEMATICAL SYNTHESIS: Assign points to the 5 rows below: 🟢=2 pts, 🟡=1 pt, 🔴=0 pts. Sum the points (Max 10). If total points are >= 7, output "Good 🟢". If 3-6 points, output "Average 🟡". If <= 2 points, output "Weak 🔴". Show the mathematical total, e.g., "Average 🟡 (5/10 points)"]
 
         | Metric Found | Actual Calculated Value | Benchmark Status (🔴/🟡/🟢) |
         | :--- | :--- | :--- |
@@ -366,47 +373,62 @@ if submit_button and ticker:
         st.markdown(p7_output)
 
     # ==================================================================
-    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Fixed Alignment Logic)
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Sensitivity Adjusted)
     # ==================================================================
-    try:
-        risk_level = p5_output.strip().lower()        
-        growth_potential = p3_output.strip().lower()   
-        is_small_cap = True  
-    except Exception:
-        risk_level = "unknown"
-        growth_potential = "unknown"
-        is_small_cap = True
+    
+    # 1. Linguistic Parsing & Feature Extraction via Vector Synonyms
+    has_moat = contains_any(p2_output, ["narrow", "wide", "moderate", "substantial", "economic moat"])
+    moat_widening = contains_any(p2_output, ["widening", "increasing", "growing moat"])
+    
+    high_growth_potential = contains_any(p3_output, ["high", "exceptional", "strong growth potential"])
+    growth_accelerating = contains_any(p3_output, ["accelerating", "speeding up", "inflection"])
+    
+    metrics_pass = contains_any(p4_output, ["good", "average", "strong", "moderate", "🟢", "🟡"])
+    risk_acceptable = contains_any(p5_output, ["low risk", "medium risk", "moderate risk", "🟢", "🟡"])
+    financials_acceptable = contains_any(p6_output, ["strong", "okay", "moderate", "robust", "healthy", "weak / strong"])
+    
+    valuation_fair_or_under = contains_any(p7_output, ["undervalued", "fairly valued", "fair value", "under-valued"])
 
-    # Deterministic Lifecycle Phase Checks mapped directly to the extracted phase number
-    if phase_num == "1" or phase_num == "5":
+    # 2. Strategic Evaluation Flow Execution
+    if phase_num in ["1", "5"]:
         calculated_status = "❌ PASS"
         rule_justification = f"Company is currently classified within a structural Startup or Declining business phase (Phase {phase_num})."
 
-    elif "high risk" in risk_level and "high" not in growth_potential:
-        calculated_status = "❌ PASS"
-        rule_justification = "The asset's high risk profile is unmitigated by an elite future growth runway."
-
-    elif "moderate" in growth_potential or "low" in growth_potential:
-        calculated_status = "❌ PASS"
-        rule_justification = "Growth potential is moderate or low, failing to meet premium return thresholds."
-
-    elif phase_num == "2" or phase_num == "3":
-        if is_small_cap and ("high" in growth_potential or "accelerating" in growth_potential):
+    elif phase_num in ["2", "3"]:
+        # Early Stage Growth Rule: Valuation is ignored completely
+        if (has_moat and moat_widening and high_growth_potential and 
+            growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
             calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_justification = f"High-growth small-cap asset operating in a prime expansion lifecycle phase (Phase {phase_num})."
+            rule_justification = f"Phase {phase_num} Early Growth Play matching all structural moat expansion, growth velocity, and foundational risk criteria (Valuation filter bypassed)."
         else:
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = f"Solid fundamentals with high growth potential, but lacks the immediate micro-cap velocity required for an instant Deep Dive (Phase {phase_num})."
+            rule_justification = f"Phase {phase_num} Early Growth Play, but missed one or more high-velocity criteria (moat, direction, metrics, or risk boundary constraints)."
+
+    elif phase_num == "4":
+        # Maturity Phase Rule: Fundamentals must pass AND valuation must be fair or undervalued
+        if (has_moat and moat_widening and high_growth_potential and 
+            growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
+            
+            if valuation_fair_or_under:
+                calculated_status = "🚀 DEEP DIVE ASAP"
+                rule_justification = "Phase 4 Mature asset meeting premium criteria with a clear valuation margin of safety (Fairly Valued / Undervalued)."
+            else:
+                calculated_status = "⏳ ADD TO WATCHLIST"
+                rule_justification = "Cleared all fundamental/moat quality bars, but flagged as Overvalued for a Phase 4 mature profile. Placed on Watchlist to await price entry point."
+        else:
+            calculated_status = "❌ PASS"
+            rule_justification = "Phase 4 asset failing to hit core structural quality and execution framework criteria."
 
     else:
         calculated_status = "⏳ ADD TO WATCHLIST"
-        rule_justification = "Cleared structural risk filters. Placed on watchlist for systematic monitoring."
+        rule_justification = "System fallback logic triggered. Placed on watchlist for manual evaluation."
 
+    # 3. Chief Investment Officer Panel Generation
     with st.expander("⚖️ Panel #8: Final Investment Decision", expanded=True):
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
         p8_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialise the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialize the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
         
@@ -419,11 +441,11 @@ if submit_button and ticker:
         Depending on the MANDATORY DESIGNATION provided above, adapt your breakdown inside the sections below using these parameters:
 
         1. If the status is "🚀 DEEP DIVE ASAP":
-           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity (the microeconomic moats, lifecycle expansion momentum, and core drivers).
+           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity (the microeconomic moats, lifecycle expansion momentum, and core drivers). If Phase 2/3, highlight why valuation is ignored in favor of growth velocity. If Phase 4, explicitly highlight the valuation discipline.
            - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear.
 
         2. If the status is "⏳ ADD TO WATCHLIST":
-           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now (e.g., waiting on margin expansion, scale, market maturity, or missing micro-cap velocity).
+           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now (e.g., waiting on valuation adjustments for mature plays, or scale/velocity attributes for earlier phase compounders).
            - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
 
         3. If the status is "❌ PASS":
