@@ -42,7 +42,12 @@ def generate_analysis_layer(ticker, prompt_text):
                     contents=prompt_text, 
                     config=config
                 )
-                return response.text
+                if response and response.text:
+                    return response.text
+                else:
+                    retries += 1
+                    time.sleep(1)
+                    continue
                 
             except APIError as e:
                 # Catch 503 (High Demand/Unavailable) or 429 (Rate Limits)
@@ -62,10 +67,22 @@ def generate_analysis_layer(ticker, prompt_text):
 
 # Helper function to extract the single digit phase number from the model's text output
 def extract_phase_number(text):
+    if not text:
+        return "3"
     match = re.search(r'\b(Phase\s*([1-5])|([1-5])\b)', text, re.IGNORECASE)
     if match:
         return match.group(2) if match.group(2) else match.group(3)
     return "3"  # Fallback baseline to Solid Growth if the text doesn't explicitly match
+
+# Helper function to extract text chunks without crashing if data is missing or malformed
+def parse_panel(text, start_tag, end_tag):
+    if not text or not isinstance(text, str):
+        return "⚠️ *Analysis data temporarily unavailable. Please try running this ticker again.*"
+    pattern = f"{start_tag}(.*?){end_tag}"
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return "⚠️ *Analysis data format mismatch. The research provider omitted the expected markers. Please rerun.*"
 
 # 4. User Input Interface
 with st.form(key="research_panel_form"):
@@ -233,12 +250,7 @@ if submit_button and ticker:
             macro_analysis_output = generate_analysis_layer(ticker, macro_prompt)
         except Exception as e:
             st.error(f"Error during macro batch execution: {e}")
-
-    # Parse out individual panel strings from the single macro text response
-    def parse_panel(text, start_tag, end_tag):
-        pattern = f"{start_tag}(.*?){end_tag}"
-        match = re.search(pattern, text, re.DOTALL)
-        return match.group(1).strip() if match else "Analysis unavailable due to processing timeout."
+            macro_analysis_output = None
 
     p2_output = parse_panel(macro_analysis_output, "=== PANEL_2_START ===", "=== PANEL_2_END ===")
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===")
@@ -299,6 +311,8 @@ if submit_button and ticker:
             p7_output = parse_panel(macro_val_output, "=== PANEL_7_START ===", "=== PANEL_7_END ===")
         except Exception as e:
             st.error(f"Error executing valuation modules: {e}")
+            p4_output = "⚠️ Valuation metrics layout error."
+            p7_output = "⚠️ Valuation calculation layout error."
 
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
         st.markdown(p4_output)
@@ -311,7 +325,7 @@ if submit_button and ticker:
     # ==================================================================
     # 1. Variable Extraction & Standardization
     try:
-        current_phase = phase_output.strip().lower()       
+        current_phase = phase_output.strip().lower() if phase_output else "unknown"       
         risk_level = p5_output.strip().lower()        
         growth_potential = p3_output.strip().lower()   
         is_small_cap = True  
