@@ -106,11 +106,9 @@ def parse_panel(text, start_tag, end_tag, fallback_header=None):
             
     # Strategy 4: Raw Text Chunking Fallback (If structural tags failed entirely)
     if "PANEL_4" in start_tag or "PANEL_2" in start_tag:
-        # Return first half of the generated block
         split_point = len(text) // 2
         return text[:split_point].strip() + "\n\n*(Note: Data recovered via structural backup layout parser)*"
     elif "PANEL_7" in start_tag or "PANEL_3" in start_tag:
-        # Return second half of the generated block
         split_point = len(text) // 2
         return text[split_point:].strip() + "\n\n*(Note: Data recovered via structural backup layout parser)*"
 
@@ -314,8 +312,28 @@ if submit_button and ticker:
     with st.spinner(f"🔢 Running valuation math specifically targeted to Phase {phase_num}..."):
         metrics_valuation_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for ticker: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
-        Step 1: Calculate core metrics and valuation models explicitly matching Phase {phase_num} methodologies.
-        Step 2: Generate output using the exact layout below. Separate blocks with '---'. Do not add conversational intro text.
+        Step 1: Use your Google Search tool to find today's current date and year.
+        Step 2: Source recent SEC EDGAR filings (10-Q/10-K) or international IR Annual Reports/investor presentations if non-US. Gather current share price, diluted share count, cash, debt, and consensus NTM (next-twelve-month) metrics. Calculate EV = Market Cap + Debt - Cash.
+        Step 3: Execute valuation models explicitly matching the Phase {phase_num} methodologies and industry overrides below.
+        Step 4: Generate output using the exact layout below. Separate blocks with '---'. Do not add conversational intro text.
+
+        ### VALUATION ALGORITHMIC FRAMEWORK BY LIFECYCLE PHASE
+        - **Phase 1 (Startup):** Primary: FWD P/S (Guidance/Consensus). Secondary: P/GP. Peer set comparison.
+        - **Phase 2 (Rapid Growth):** Primary: EV/Sales. Secondary: FWD P/S.
+        - **Phase 3 (Solid Growth):** Primary: P/Sales. Secondary: EV/EBITDA (NTM).
+        - **Phase 4 (Maturity):** Primary: Discounted Cash Flow (DCF) (5-10yr explicit + perpetuity). Secondary: FWD P/E.
+        - **Phase 5 (Declining):** Primary: Sum-of-the-Parts (SOTP) / Net Asset Value (NAV). Secondary: Reverse DCF / Liquidation Value / Dividend Yield vs Risk-Free Rate.
+
+        ### INDUSTRY / ASSAY-SPECIFIC OVERRIDES (Apply if company matches industry)
+        - **Biotech / Life Sciences:** Probability-adjusted NPV (pNPV) of clinical pipeline using success probabilities. EV/Peak Sales. Green if Market Cap <= 0.7x pNPV; Yellow 0.7-1.3x; Red >= 1.3x.
+        - **SaaS / Software:** Apply Rule of 40 (Growth % + FCF %). Evaluate EV/Gross Profit, FWD P/S, and Net Dollar Retention.
+        - **Energy / Mining:** Net Asset Value (NAV/NPV) of reserves, SOTP by asset tier, EV/Reserves.
+        - **Bitcoin / Crypto Treasury Companies:** Determine current market Net Asset Value (mNAV) and benchmark to peers.
+
+        ### BENCHMARK COLOR RULES
+        - 🟩 Green (Undervalued): Multiple <= peer 25th percentile OR <= company's own 3-year low. (Or unique industry tier match).
+        - 🟨 Yellow (Within Normal Range / Fairly Valued): Multiple between peer 25th and 75th percentile.
+        - 🟥 Red (Overvalued): Multiple >= peer 75th percentile OR >= company's 3-year high.
 
         === PANEL_4_START ===
         ### 📊 Phase {phase_num} Core Diagnostic Benchmarking
@@ -332,9 +350,18 @@ if submit_button and ticker:
 
         === PANEL_7_START ===
         ### 💰 Phase-Appropriate Valuation Model Target
-        - **Target Phase Framework applied:** Valuation Method for Phase {phase_num}
-        - **Calculated Multiple / Model output:** [Provide exact multiple or valuation range, e.g., EV/Sales, Forward P/E, Reverse DCF intrinsic range]
-        - **Benchmark Context:** [Compare against industry peer average thresholds]
+        - **Company:** {ticker}
+        - **Phase:** {phase_num}
+        - **Summary Valuation Rating:** [MANDATORY EVALUATION: State strictly as either **Undervalued 🟢**, **Fairly Valued 🟡**, or **Overvalued 🔴** based on the percentile comparison rules above]
+        - **Target Phase Framework applied:** Valuation Method for Phase {phase_num} (plus any applicable Industry Override)
+        - **Calculated Multiple / Model output:** [Provide exact multiple or valuation range, e.g., EV/Sales, Forward P/E, Reverse DCF intrinsic range, or pNPV calculations]
+        - **Benchmark Sector Context:** [Provide explicit text evaluating current multiples relative to sector medians, peer distributions (25th/75th percentiles), and the company's 3-yr baseline to validate the summary rating]
+        - **Key Drivers:** [List core components such as growth, margins, or risk trends moving this valuation]
+        - **Sensitivity:** [Key assumptions that shift this valuation stance]
+
+        ## 📎 Sources
+        [1] Source Name (10-Q/10-K/IR Report)
+        [2] Source Name (Market Data/Consensus/Peer Medians)
         === PANEL_7_END ===
         """
         try:
@@ -421,10 +448,11 @@ if submit_button and ticker:
            - **Core Investment Thesis:** Diagnose clearly whether the rejection is due to being too systemically or structurally risky (e.g., concentration issues, balance sheet distress) OR due to simply not being good enough from an expansion standpoint (e.g., stagnant revenue profiles, flatlining markets, weak phase dynamics).
            - **Key Risks to Identify:** Articulate the precise toxic flaw, cyclical decline mechanism, or competitive erosion hurdle that breaks the potential upside entirely.
 
-        Output ONLY the markdown format below.
+        Output ONLY the markdown format below. Ensure the layout matches perfectly, using the blockquote mark (>) on the final recommendation line so that it stands out dramatically for the user.
 
         # ⚖️ Assessment Summary: {ticker}
-        **Final Framework Recommendation:** {calculated_status}
+        > **Final Recommendation:** {calculated_status}
+
         **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
         ### 📋 Core Investment Thesis & Risks
