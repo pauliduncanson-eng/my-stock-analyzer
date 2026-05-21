@@ -6,8 +6,8 @@ from google.genai import types
 from google.genai.errors import APIError
 
 # 1. Page Configuration & Styling
-st.set_page_config(page_title="Equity Research Analyzer", layout="wide")
-st.title("💎European Hidden Gems Research Dashboard💎")
+st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
+st.title("📊 European Hidden Gems Research Dashboard")
 st.subheader("Run your proprietary investment framework instantly")
 
 # 2. Securely Initialize Gemini Client
@@ -125,7 +125,7 @@ if submit_button and ticker:
     st.info(f"Analyzing {ticker}... Pulling primary filings, establishing lifecycle phase, and processing framework panels.")
 
     # ==================================================================
-    # 🧭 BATCH 1: Business Phase Analysis (Font size updated for Identified Phase)
+    # 🧭 BATCH 1: Business Phase Analysis
     # ==================================================================
     phase_output = ""
     with st.expander("🧭 Business Phase Analysis", expanded=True):
@@ -165,7 +165,7 @@ if submit_button and ticker:
     st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
     # ==================================================================
-    # 🏎️ BATCH 2: Core Analysis Macro-Prompt (Moat & Growth Styling tweaks applied)
+    # 🏎️ BATCH 2: Core Analysis Macro-Prompt (Moat & Growth Layout Updates)
     # ==================================================================
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
@@ -366,22 +366,21 @@ if submit_button and ticker:
         st.markdown(p7_output)
 
     # ==================================================================
-    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Fixed Alignment Logic)
     # ==================================================================
     try:
-        current_phase = phase_output.strip().lower() if phase_output else "unknown"       
         risk_level = p5_output.strip().lower()        
         growth_potential = p3_output.strip().lower()   
         is_small_cap = True  
     except Exception:
-        current_phase = "unknown"
         risk_level = "unknown"
         growth_potential = "unknown"
         is_small_cap = True
 
-    if "declining" in current_phase or "startup" in current_phase or "phase 1" in current_phase or "phase 5" in current_phase:
+    # Deterministic Lifecycle Phase Checks mapped directly to the extracted phase number
+    if phase_num == "1" or phase_num == "5":
         calculated_status = "❌ PASS"
-        rule_justification = "Company is currently classified within a structural Startup or Declining business phase."
+        rule_justification = f"Company is currently classified within a structural Startup or Declining business phase (Phase {phase_num})."
 
     elif "high risk" in risk_level and "high" not in growth_potential:
         calculated_status = "❌ PASS"
@@ -391,13 +390,13 @@ if submit_button and ticker:
         calculated_status = "❌ PASS"
         rule_justification = "Growth potential is moderate or low, failing to meet premium return thresholds."
 
-    elif "rapid" in current_phase or "solid" in current_phase or "phase 2" in current_phase or "phase 3" in current_phase:
+    elif phase_num == "2" or phase_num == "3":
         if is_small_cap and ("high" in growth_potential or "accelerating" in growth_potential):
             calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_justification = "High-growth small-cap asset operating in a prime Rapid or Solid expansion lifecycle phase."
+            rule_justification = f"High-growth small-cap asset operating in a prime expansion lifecycle phase (Phase {phase_num})."
         else:
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "Solid fundamentals with high growth potential, but lacks the immediate micro-cap velocity required for an instant Deep Dive."
+            rule_justification = f"Solid fundamentals with high growth potential, but lacks the immediate micro-cap velocity required for an instant Deep Dive (Phase {phase_num})."
 
     else:
         calculated_status = "⏳ ADD TO WATCHLIST"
