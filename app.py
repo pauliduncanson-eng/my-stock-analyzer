@@ -404,16 +404,32 @@ if submit_button and ticker:
         MANDATORY DESIGNATION: {calculated_status}
         SYSTEM REASONING: {rule_justification}
 
-        You MUST accept this designation. Your role is to write the executive synthesis explaining the qualitative 'Why' behind this decision, utilizing the findings from our individual modules. Output ONLY the markdown format below.
+        You MUST accept this designation. Your role is to write the executive synthesis explaining the qualitative 'Why' behind this decision, utilizing the findings from our individual modules.
 
-        # ⚖️ Strategic Allocation Summary: {ticker}
+        CRITICAL ROUTING INSTRUCTIONS FOR INSIGHT GENERATION:
+        Depending on the MANDATORY DESIGNATION provided above, adapt your breakdown inside the sections below using these parameters:
+
+        1. If the status is "🚀 DEEP DIVE ASAP":
+           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity (the microeconomic moats, lifecycle expansion momentum, and core drivers).
+           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear.
+
+        2. If the status is "⏳ ADD TO WATCHLIST":
+           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now (e.g., waiting on margin expansion, scale, market maturity, or missing micro-cap velocity).
+           - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
+
+        3. If the status is "❌ PASS":
+           - **Core Investment Thesis:** Diagnose clearly whether the rejection is due to being too systemically or structurally risky (e.g., concentration issues, balance sheet distress) OR due to simply not being good enough from an expansion standpoint (e.g., stagnant revenue profiles, flatlining markets, weak phase dynamics).
+           - **Key Risks to Identify:** Articulate the precise toxic flaw, cyclical decline mechanism, or competitive erosion hurdle that breaks the potential upside entirely.
+
+        Output ONLY the markdown format below.
+
+        # ⚖️ Assessment Summary: {ticker}
         **Final Framework Recommendation:** {calculated_status}
         **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
-        ### 📋 Core Synthesis Matrix
-        - **Moat & Growth Alignment:** [1-2 sentences explaining how the moat protects or fails to protect this specific growth lifecycle.]
-        - **Financial Health vs. Valuation:** [1-2 sentences balancing the balance sheet against the current trading multiple.]
-        - **Execution Risk Friction:** [1-2 sentences detailing the primary threat that validates our risk rating.]
+        ### 📋 Core Investment Thesis & Risks
+        - **Core Investment Thesis:** [Provide a detailed 2-3 sentence strategic rationale customized to the designation parameters specified above.]
+        - **Key Risks to Identify:** [Provide a detailed 2-3 sentence breakdown customized to the designation parameters specified above.]
 
         ### 🛠️ Required Next Steps
         - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
