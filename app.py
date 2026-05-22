@@ -1,20 +1,23 @@
 import streamlit as st
 import io
-from fpdf import FPDF
+# 📄 REMOVE 'from fpdf import FPDF' from here completely!
+
+# ... the rest of your regular stock code, API keys, and UI panels ...
 
 def render_export_module(ticker_symbol, panels_dictionary):
     """
     An isolated, error-resistant module that generates completely self-contained
     PDF and Word byte buffers to guarantee seamless downloads on Streamlit Cloud.
     """
-    # 🛑 SAFETY GATE 1: If no ticker or data exists yet, quietly exit the function
-    # to prevent the app from breaking on initial page load.
+    # 🩹 DELAYED IMPORT: We load FPDF safely inside the function execution block
+    from fpdf import FPDF
+
     if not ticker_symbol or not panels_dictionary:
         return
 
     st.write("---")
     st.subheader("📥 Export Complete Research Report")
-    st.write("Save a copy of this generation for your archives or offline reading.")
+    # ... rest of the function remains identical ...
     
     # -------------------------------------------------------------
     # 1. PRE-GENERATE THE WORD DOCUMENT BUFFER (.doc)
