@@ -6,10 +6,12 @@ def render_export_module(ticker_symbol, panels_dictionary):
     """
     An isolated, error-resistant module that generates completely self-contained
     PDF and Word byte buffers to guarantee seamless downloads on Streamlit Cloud.
-    
-    :param ticker_symbol: String (e.g., 'AAPL', 'MSFT')
-    :param panels_dictionary: Dict where keys are panel titles and values are raw string outputs
     """
+    # 🛑 SAFETY GATE 1: If no ticker or data exists yet, quietly exit the function
+    # to prevent the app from breaking on initial page load.
+    if not ticker_symbol or not panels_dictionary:
+        return
+
     st.write("---")
     st.subheader("📥 Export Complete Research Report")
     st.write("Save a copy of this generation for your archives or offline reading.")
@@ -17,19 +19,21 @@ def render_export_module(ticker_symbol, panels_dictionary):
     # -------------------------------------------------------------
     # 1. PRE-GENERATE THE WORD DOCUMENT BUFFER (.doc)
     # -------------------------------------------------------------
-    # We construct a clean text document featuring explicit structural separation
-    word_text = f"EQUITY RESEARCH REPORT: {ticker_symbol.upper()}\n"
+    word_text = f"EQUITY RESEARCH REPORT: {str(ticker_symbol).upper()}\n"
     word_text += f"Generated via Research Terminal Platform\n"
     word_text += "=" * 40 + "\n\n"
     
-    for title, text_content in panels_dictionary.items():
-        word_text += f"=== {title.upper()} ===\n"
-        word_text += f"{text_content}\n"
-        word_text += "-" * 40 + "\n\n"
+    # 🛑 SAFETY GATE 2: Handle cases where panels_dictionary might be a string or corrupted
+    if isinstance(panels_dictionary, dict):
+        for title, text_content in panels_dictionary.items():
+            word_text += f"=== {str(title).upper()} ===\n"
+            word_text += f"{str(text_content)}\n"
+            word_text += "-" * 40 + "\n\n"
+    else:
+        # Fallback if raw text was passed instead of a dictionary
+        word_text += f"{str(panels_dictionary)}\n"
         
-    # Convert string directly to clean, system-agnostic bytes
     word_bytes = word_text.encode("utf-8", errors="ignore")
-
 
     # -------------------------------------------------------------
     # 2. PRE-GENERATE THE PDF DOCUMENT BUFFER (.pdf)
@@ -42,41 +46,39 @@ def render_export_module(ticker_symbol, panels_dictionary):
         
         # Document Main Header Style
         pdf.set_font("Helvetica", style="B", size=16)
-        pdf.cell(w=0, h=10, text=f"Equity Research Report: {ticker_symbol.upper()}", new_x="LMARGIN", new_y="NEXT", align="C")
+        pdf.cell(w=0, h=10, text=f"Equity Research Report: {str(ticker_symbol).upper()}", new_x="LMARGIN", new_y="NEXT", align="C")
         pdf.set_font("Helvetica", style="I", size=10)
         pdf.cell(w=0, h=6, text="Generated via Research Terminal Engine", new_x="LMARGIN", new_y="NEXT", align="C")
         pdf.ln(10)
         
-        for title, text_content in panels_dictionary.items():
-            # Section Title Block
-            pdf.set_font("Helvetica", style="B", size=12)
-            pdf.cell(w=0, h=8, text=title, new_x="LMARGIN", new_y="NEXT")
-            pdf.ln(2)
-            
-            # Content Paragraph Sanitization & Formatting
+        if isinstance(panels_dictionary, dict):
+            for title, text_content in panels_dictionary.items():
+                # Section Title Block
+                pdf.set_font("Helvetica", style="B", size=12)
+                pdf.cell(w=0, h=8, text=str(title), new_x="LMARGIN", new_y="NEXT")
+                pdf.ln(2)
+                
+                # Content Paragraph Sanitization & Formatting
+                pdf.set_font("Helvetica", style="", size=10)
+                sanitized_content = str(text_content).replace("**", "").replace("*", "").replace("#", "")
+                clean_text = sanitized_content.encode("latin-1", errors="ignore").decode("latin-1")
+                
+                pdf.multi_cell(w=0, h=5, text=clean_text)
+                pdf.ln(6)
+        else:
             pdf.set_font("Helvetica", style="", size=10)
-            
-            # Strip out markdown symbols (*, #) that ruin PDF plaintext layouts
-            sanitized_content = text_content.replace("**", "").replace("*", "").replace("#", "")
-            
-            # Convert unicode safely to latin-1 parameters to prevent high-byte crashes
+            sanitized_content = str(panels_dictionary).replace("**", "").replace("*", "").replace("#", "")
             clean_text = sanitized_content.encode("latin-1", errors="ignore").decode("latin-1")
-            
-            # Use multi_cell to handle line wrapping naturally
             pdf.multi_cell(w=0, h=5, text=clean_text)
-            pdf.ln(6)
-            
-        # Compile into raw binary byte array format natively
+
         pdf_bytes = pdf.output()
         
     except Exception as pdf_error:
-        # Graceful fallback indicator so the UI never locks up or crashes out
         pdf_bytes = b""
         st.sidebar.error(f"PDF compilation bypass engaged: {str(pdf_error)}")
 
-
     # -------------------------------------------------------------
-    # 3. RENDER THE MEMORY-BOUND DOWNLOAD BUTTONS SIDE-BY-SIDE
+    # 3. RENDER THE DOWNLOAD BUTTONS SIDE-BY-SIDE
     # -------------------------------------------------------------
     col1, col2 = st.columns(2)
     
@@ -84,7 +86,7 @@ def render_export_module(ticker_symbol, panels_dictionary):
         st.download_button(
             label="📄 Download Word Document (.doc)",
             data=word_bytes,
-            file_name=f"{ticker_symbol.upper()}_Research_Report.doc",
+            file_name=f"{str(ticker_symbol).upper()}_Research_Report.doc",
             mime="application/msword",
             use_container_width=True,
             key="word_download_action"
@@ -95,7 +97,7 @@ def render_export_module(ticker_symbol, panels_dictionary):
             st.download_button(
                 label="📕 Download PDF Report (.pdf)",
                 data=pdf_bytes,
-                file_name=f"{ticker_symbol.upper()}_Research_Report.pdf",
+                file_name=f"{str(ticker_symbol).upper()}_Research_Report.pdf",
                 mime="application/pdf",
                 use_container_width=True,
                 key="pdf_download_action"
