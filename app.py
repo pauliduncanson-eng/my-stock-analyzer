@@ -2,6 +2,7 @@ import streamlit as st
 import re
 import time
 import io
+import random
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
@@ -91,7 +92,7 @@ if check_password():
 
     client = get_gemini_client()
 
-    # 3. Optimized API Call Wrapper
+    # 3. Optimized API Call Wrapper with High-Resiliency Backoff Engine
     @st.cache_data(show_spinner=False)
     def generate_analysis_layer(ticker, prompt_text):
         config = types.GenerateContentConfig(
@@ -100,7 +101,7 @@ if check_password():
         )
         
         models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
-        max_retries = 3
+        max_retries = 5  # Upgraded from 3 to allow deeper mitigation of Google rate bounds
         
         for model_name in models_to_try:
             retries = 0
@@ -115,14 +116,16 @@ if check_password():
                         return response.text
                     else:
                         retries += 1
-                        time.sleep(1)
+                        time.sleep(1.5)
                         continue
-                    
+                        
                 except APIError as e:
-                    if e.code in [503, 429]:
+                    # Capture Rate-Limits (429) or Server Overloads (503) explicitly
+                    if e.code in [429, 503]:
                         retries += 1
                         if retries < max_retries:
-                            sleep_time = 2 ** retries 
+                            # Full Exponential Backoff + Jitter to break search-pacing concurrency issues
+                            sleep_time = (2 ** retries) + random.uniform(0.5, 1.5)
                             time.sleep(sleep_time)
                             continue
                     break
@@ -239,6 +242,9 @@ if check_password():
         phase_num = extract_phase_number(phase_output)
         st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
+        # Pacing window to separate intense Google Search grounding operations
+        time.sleep(1.0)
+
         # ==================================================================
         # 🏎️ BATCH 2: Core Analysis Macro-Prompt
         # ==================================================================
@@ -346,21 +352,8 @@ if check_password():
         p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
         p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
 
-        col1, col2 = st.columns(2)
-        with col1:
-            with st.expander("🏰 Moat Analysis v3", expanded=True):
-                st.markdown(p2_output, unsafe_allow_html=True)
-        with col2:
-            with st.expander("🚀 Business Growth Analysis v2.2", expanded=True):
-                st.markdown(p3_output)
-
-        col3, col4 = st.columns(2)
-        with col3:
-            with st.expander("⚠️ Business Risk Analysis v2.0", expanded=True):
-                st.markdown(p5_output)
-        with col4:
-            with st.expander("📊 Financial Statement Analysis v1.1", expanded=True):
-                st.markdown(p6_output)
+        # Pacing window to ensure Google Search endpoints do not overlap execution bursts
+        time.sleep(1.0)
 
         # ==================================================================
         # ⚖️ BATCH 3: Dynamic Metrics & Valuation Layer
@@ -394,11 +387,8 @@ if check_password():
             except Exception as e:
                 st.error(f"Error executing valuation modules: {e}")
 
-        with st.expander("📊 Business Key Metrics Analysis", expanded=True):
-            st.markdown(p4_output)
-
-        with st.expander("💰 Business Valuation Analysis", expanded=True):
-            st.markdown(p7_output)
+        # Pacing window before final scoring generation layer
+        time.sleep(1.0)
 
         # ==================================================================
         # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
@@ -471,16 +461,10 @@ if check_password():
             """
             try:
                 final_decision = generate_analysis_layer(ticker, p8_prompt)
-                st.markdown(final_decision, unsafe_allow_html=True)
             except Exception as e:
                 st.error(f"Error executing Panel 8 Logic Layer: {e}")
 
-        st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
-
-        # ==================================================================
-        # 💾 EXPORT & SESSION STATE LAYER
-        # ==================================================================
-        # Package data into state to survive interface interactions
+        # Package data into state to survive interface interactions cleanly
         st.session_state.current_report = {
             "Phase Analysis": phase_output,
             "Moat Analysis": p2_output,
@@ -492,8 +476,50 @@ if check_password():
             "Investment Board Resolution": final_decision
         }
 
-    # If a valid evaluation matrix exists inside the state layer, render the PDF component
+    # ==================================================================
+    # ✨ RENDER EXPANDED DASHBOARD FROM PERSISTED STATE
+    # ==================================================================
     if st.session_state.current_report:
+        # Re-read metrics to safely decouple state from generation structures
+        p2_output = st.session_state.current_report["Moat Analysis"]
+        p3_output = st.session_state.current_report["Growth Analysis"]
+        p5_output = st.session_state.current_report["Risk Factors"]
+        p6_output = st.session_state.current_report["Financial Statement Analysis"]
+        p4_output = st.session_state.current_report["Diagnostic Metrics"]
+        p7_output = st.session_state.current_report["Valuation Assessment"]
+        final_decision = st.session_state.current_report["Investment Board Resolution"]
+
+        col1, col2 = st.columns(2)
+        with col1:
+            with st.expander("🏰 Moat Analysis v3", expanded=True):
+                st.markdown(p2_output, unsafe_allow_html=True)
+        with col2:
+            with st.expander("🚀 Business Growth Analysis v2.2", expanded=True):
+                st.markdown(p3_output)
+
+        col3, col4 = st.columns(2)
+        with col3:
+            with st.expander("⚠️ Business Risk Analysis v2.0", expanded=True):
+                st.markdown(p5_output)
+        with col4:
+            with st.expander("📊 Financial Statement Analysis v1.1", expanded=True):
+                st.markdown(p6_output)
+
+        with st.expander("📊 Business Key Metrics Analysis", expanded=True):
+            st.markdown(p4_output)
+
+        with st.expander("💰 Business Valuation Analysis", expanded=True):
+            st.markdown(p7_output)
+
+        if final_decision:
+            with st.expander("⚖️ Panel #8: Final Investment Decision Layout", expanded=True):
+                st.markdown(final_decision, unsafe_allow_html=True)
+
+        st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
+
+        # ==================================================================
+        # 💾 EXPORT MEMO LAYER
+        # ==================================================================
         st.write("### 📥 Export Investment Memo")
         try:
             pdf_data = make_pdf(st.session_state.report_ticker, st.session_state.current_report)
