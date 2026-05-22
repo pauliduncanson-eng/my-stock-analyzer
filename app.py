@@ -509,6 +509,35 @@ if check_password():
                 st.error(f"Error executing Panel 8 Logic Layer: {e}")
 
         st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
+# ==================================================================
+        # 💾 EXPORT & SESSION STATE LAYER
+        # ==================================================================
+        # Package data into state to survive interface interactions
+        st.session_state.current_report = {
+            "Phase Analysis": phase_output,
+            "Moat Analysis": p2_output,
+            "Growth Analysis": p3_output,
+            "Diagnostic Metrics": p4_output,
+            "Risk Factors": p5_output,
+            "Financial Statement Analysis": p6_output,
+            "Valuation Assessment": p7_output,
+            "Investment Board Resolution": final_decision
+        }
+
+    # If a valid evaluation matrix exists inside the state layer, render the PDF component
+    if st.session_state.current_report:
+        st.write("### 📥 Export Investment Memo")
+        try:
+            pdf_data = make_pdf(st.session_state.report_ticker, st.session_state.current_report)
+            st.download_button(
+                label="📕 Download Research Report (.pdf)",
+                data=pdf_data,
+                file_name=f"HiddenGems_Analysis_{st.session_state.report_ticker.replace(' ', '_')}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        except Exception as exp_err:
+            st.error(f"PDF engine canvas construction failure: {exp_err}")
 
     # ------------------------------------------------------------------
     # 🔄 RESET RUNTIME CONTROLS
