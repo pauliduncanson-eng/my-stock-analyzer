@@ -1,23 +1,25 @@
 import streamlit as st
 import io
-# 📄 REMOVE 'from fpdf import FPDF' from here completely!
 
-# ... the rest of your regular stock code, API keys, and UI panels ...
-
+# =====================================================================
+# 💾 EXPORT MODULE (PDF & WORD ENGINE)
+# =====================================================================
 def render_export_module(ticker_symbol, panels_dictionary):
     """
     An isolated, error-resistant module that generates completely self-contained
     PDF and Word byte buffers to guarantee seamless downloads on Streamlit Cloud.
     """
-    # 🩹 DELAYED IMPORT: We load FPDF safely inside the function execution block
-    from fpdf import FPDF
-
+    # 🛑 SAFETY GATE 1: If no ticker or data exists yet, quietly exit the function
+    # to prevent the app from breaking on initial page load.
     if not ticker_symbol or not panels_dictionary:
         return
 
+    # 🩹 DELAYED IMPORT: Move this inside the function to keep app startup clean
+    from fpdf import FPDF
+
     st.write("---")
     st.subheader("📥 Export Complete Research Report")
-    # ... rest of the function remains identical ...
+    st.write("Save a copy of this generation for your archives or offline reading.")
     
     # -------------------------------------------------------------
     # 1. PRE-GENERATE THE WORD DOCUMENT BUFFER (.doc)
@@ -26,14 +28,12 @@ def render_export_module(ticker_symbol, panels_dictionary):
     word_text += f"Generated via Research Terminal Platform\n"
     word_text += "=" * 40 + "\n\n"
     
-    # 🛑 SAFETY GATE 2: Handle cases where panels_dictionary might be a string or corrupted
     if isinstance(panels_dictionary, dict):
         for title, text_content in panels_dictionary.items():
             word_text += f"=== {str(title).upper()} ===\n"
             word_text += f"{str(text_content)}\n"
             word_text += "-" * 40 + "\n\n"
     else:
-        # Fallback if raw text was passed instead of a dictionary
         word_text += f"{str(panels_dictionary)}\n"
         
     word_bytes = word_text.encode("utf-8", errors="ignore")
@@ -74,7 +74,11 @@ def render_export_module(ticker_symbol, panels_dictionary):
             clean_text = sanitized_content.encode("latin-1", errors="ignore").decode("latin-1")
             pdf.multi_cell(w=0, h=5, text=clean_text)
 
-        pdf_bytes = pdf.output()
+        # 🔧 FIX: Explicitly output to a safe string/bytes destination ('S')
+        raw_pdf_output = pdf.output(dest='S')
+        
+        # Ensure it's explicitly cast to a bytes object for st.download_button
+        pdf_bytes = bytes(raw_pdf_output) if not isinstance(raw_pdf_output, bytes) else raw_pdf_output
         
     except Exception as pdf_error:
         pdf_bytes = b""
@@ -112,3 +116,28 @@ def render_export_module(ticker_symbol, panels_dictionary):
                 use_container_width=True,
                 key="pdf_disabled_button"
             )
+
+# =====================================================================
+# 🖥️ MAIN APPLICATION INTERFACE (YOUR EXISTING APPLICATION LOGIC)
+# =====================================================================
+
+st.title("🔎 Premium Small-Cap Research Terminal")
+st.write("Enter a ticker symbol below to generate an end-to-end multi-panel research report.")
+
+# Input Field for Ticker
+ticker_input = st.text_input("Ticker Symbol (e.g., Schneider, Archos, Robot):", "").strip()
+
+# --- Example of compiling data from your various research panels ---
+# (Replace this sample block with your actual AI generation engine values)
+if ticker_input:
+    st.success(f"Analysis complete for: {ticker_input.upper()}")
+    
+    # This dictionary gathers your text sections to feed into the download buttons
+    compiled_panels_data = {
+        "Panel 1: Competitive Advantage & Moat": "Sample analysis regarding business competitive structural dynamics.",
+        "Panel 5: Financial Health Check": "Sample overview of balance sheet allocations and free cash flow generation metric targets.",
+        "Panel 8: Final Valuation Triage Verdict": "Sample final valuation scoring outcome verdict metric parameters."
+    }
+    
+    # 🚀 CALL THE EXPORT UTILITY BUTTONS HERE
+    render_export_module(ticker_input, compiled_panels_data)
