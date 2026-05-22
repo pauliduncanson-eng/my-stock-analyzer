@@ -2,7 +2,7 @@ import streamlit as st
 from components.financials_analyser import render_financials_tab
 from components.valuation_calculator import render_valuation_tab
 from engines.phase_identifier import run_phase_identifier
-from engines.moat_analyser import run_moat_analyser
+from engines.moat_analyzer import run_moat_analyzer
 from engines.growth_vectors import run_growth_vectors
 from engines.diagnostic_checks import run_diagnostic_checks
 from engines.risk_evaluator import run_risk_evaluator
