@@ -377,53 +377,80 @@ if submit_button and ticker:
     # ==================================================================
     
     # 1. Linguistic Parsing & Feature Extraction via Vector Synonyms
-    has_moat = contains_any(p2_output, ["narrow", "wide", "moderate", "substantial", "economic moat"])
-    moat_widening = contains_any(p2_output, ["widening", "increasing", "growing moat"])
+    has_moat_narrow_or_mod = contains_any(p2_output, ["narrow", "moderate", "⚖️", "➖"])
+    moat_narrowing = contains_any(p2_output, ["narrowing", "decreasing", "eroding", "❌"])
     
-    high_growth_potential = contains_any(p3_output, ["high", "exceptional", "strong growth potential"])
-    growth_accelerating = contains_any(p3_output, ["accelerating", "speeding up", "inflection"])
+    growth_potential_mod_or_low = contains_any(p3_output, ["moderate", "low", "➖", "❌"])
+    growth_stable_or_decel = contains_any(p3_output, ["stable", "decelerating", "slowing", "➖", "❌"])
     
+    metrics_poor = contains_any(p4_output, ["weak", "poor", "🔴", "0/10", "1/10", "2/10"])
+    risk_high = contains_any(p5_output, ["high risk", "high level of risk", "🔴"])
+
+    # Baseline parsing for deep dive/watchlist qualifications
+    has_moat_valid = contains_any(p2_output, ["narrow", "wide", "moderate", "substantial", "economic moat"])
+    moat_widening = contains_any(p2_output, ["widening", "increasing", "growing moat", "✅"])
+    high_growth_potential = contains_any(p3_output, ["high", "exceptional", "strong growth potential", "✅"])
+    growth_accelerating = contains_any(p3_output, ["accelerating", "speeding up", "inflection", "✅"])
     metrics_pass = contains_any(p4_output, ["good", "average", "strong", "moderate", "🟢", "🟡"])
     risk_acceptable = contains_any(p5_output, ["low risk", "medium risk", "moderate risk", "🟢", "🟡"])
-    financials_acceptable = contains_any(p6_output, ["strong", "okay", "moderate", "robust", "healthy", "weak / strong"])
-    
-    valuation_fair_or_under = contains_any(p7_output, ["undervalued", "fairly valued", "fair value", "under-valued"])
+    financials_acceptable = contains_any(p6_output, ["strong", "okay", "moderate", "robust", "healthy"])
+    valuation_fair_or_under = contains_any(p7_output, ["undervalued", "fairly valued", "fair value", "under-valued", "🟢", "🟡"])
 
-    # 2. Strategic Evaluation Flow Execution
+    # 2. Hard Gatekeeper Assessment (Priority Rejections)
+    calculated_status = None
+    rule_justification = ""
+
+    # Phase Hard passes (Not Good Enough)
     if phase_num in ["1", "5"]:
-        calculated_status = "❌ PASS"
-        rule_justification = f"Company is currently classified within a structural Startup or Declining business phase (Phase {phase_num})."
+        calculated_status = "❌ PASS (Not Good Enough)"
+        rule_justification = f"Company is structurally limited by its business life cycle phase (Phase {phase_num} - Startup/Declining)."
 
-    elif phase_num in ["2", "3"]:
-        # Early Stage Growth Rule: Valuation is ignored completely
-        if (has_moat and moat_widening and high_growth_potential and 
-            growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
-            calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_justification = f"Phase {phase_num} Early Growth Play matching all structural moat expansion, growth velocity, and foundational risk criteria (Valuation filter bypassed)."
-        else:
-            calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = f"Phase {phase_num} Early Growth Play, but missed one or more high-velocity criteria (moat, direction, metrics, or risk boundary constraints)."
+    # Too Risky Hard Pass: Poor metrics combined with High Risk
+    elif metrics_poor and risk_high:
+        calculated_status = "❌ PASS (Too Risky)"
+        rule_justification = "Fatal structural risk profile: Execution risk is high and key financial/operational metrics are tracking poorly."
 
-    elif phase_num == "4":
-        # Maturity Phase Rule: Fundamentals must pass AND valuation must be fair or undervalued
-        if (has_moat and moat_widening and high_growth_potential and 
-            growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
-            
-            if valuation_fair_or_under:
+    # Not Good Enough Hard Pass: Weakening Moat Dynamics
+    elif has_moat_narrow_or_mod and moat_narrowing:
+        calculated_status = "❌ PASS (Not Good Enough)"
+        rule_justification = "Competitive erosion detected: The company holds only a narrow or moderate economic moat that is currently narrowing."
+
+    # Not Good Enough Hard Pass: Weak or Flatlined Growth Runway
+    elif growth_potential_mod_or_low and growth_stable_or_decel:
+        calculated_status = "❌ PASS (Not Good Enough)"
+        rule_justification = "Insufficient growth runway: Future growth potential is locked at moderate/low with a stable or decelerating velocity profile."
+
+    # 3. Qualification Framework Evaluation Flow (If Hard Passes are Cleared)
+    if calculated_status is None:
+        if phase_num in ["2", "3"]:
+            # Early Stage Growth Rule: Valuation is ignored completely
+            if (has_moat_valid and moat_widening and high_growth_potential and 
+                growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
                 calculated_status = "🚀 DEEP DIVE ASAP"
-                rule_justification = "Phase 4 Mature asset meeting premium criteria with a clear valuation margin of safety (Fairly Valued / Undervalued)."
+                rule_justification = f"Phase {phase_num} Early Growth Play matching all structural moat expansion, growth velocity, and foundational risk criteria (Valuation filter bypassed)."
             else:
                 calculated_status = "⏳ ADD TO WATCHLIST"
-                rule_justification = "Cleared all fundamental/moat quality bars, but flagged as Overvalued for a Phase 4 mature profile. Placed on Watchlist to await price entry point."
+                rule_justification = f"Phase {phase_num} Growth asset, but missing premium acceleration metrics. Tracked for pipeline timing changes."
+
+        elif phase_num == "4":
+            # Maturity Phase Rule: Fundamentals must pass AND valuation must be fair or undervalued
+            if (has_moat_valid and moat_widening and high_growth_potential and 
+                growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
+                
+                if valuation_fair_or_under:
+                    calculated_status = "🚀 DEEP DIVE ASAP"
+                    rule_justification = "Phase 4 Mature asset meeting premium criteria with a clear valuation margin of safety (Fairly Valued / Undervalued)."
+                else:
+                    calculated_status = "⏳ ADD TO WATCHLIST"
+                    rule_justification = "Cleared quality bars, but flagged as Overvalued for a Phase 4 profile. Placed on Watchlist to await entry price."
+            else:
+                calculated_status = "❌ PASS (Not Good Enough)"
+                rule_justification = "Phase 4 mature profile failing to meet core structural framework requirements."
         else:
-            calculated_status = "❌ PASS"
-            rule_justification = "Phase 4 asset failing to hit core structural quality and execution framework criteria."
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = "System fallback logic triggered. Placed on watchlist for manual evaluation."
 
-    else:
-        calculated_status = "⏳ ADD TO WATCHLIST"
-        rule_justification = "System fallback logic triggered. Placed on watchlist for manual evaluation."
-
-    # 3. Chief Investment Officer Panel Generation
+    # 4. Chief Investment Officer Panel Generation
     with st.expander("⚖️ Panel #8: Final Investment Decision", expanded=True):
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
@@ -448,9 +475,13 @@ if submit_button and ticker:
            - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now (e.g., waiting on valuation adjustments for mature plays, or scale/velocity attributes for earlier phase compounders).
            - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
 
-        3. If the status is "❌ PASS":
-           - **Core Investment Thesis:** Diagnose clearly whether the rejection is due to being too systemically or structurally risky (e.g., concentration issues, balance sheet distress) OR due to simply not being good enough from an expansion standpoint (e.g., stagnant revenue profiles, flatlining markets, weak phase dynamics).
-           - **Key Risks to Identify:** Articulate the precise toxic flaw, cyclical decline mechanism, or competitive erosion hurdle that breaks the potential upside entirely.
+        3. If the status is "❌ PASS (Too Risky)":
+           - **Core Investment Thesis:** Clearly diagnose that this asset failed the safety audit. Focus heavily on why the combination of toxic risk exposure and bleeding core metrics creates a permanent destruction of capital risk, completely invalidating any potential growth narrative.
+           - **Key Risks to Identify:** Outline the specific systemic risk factors, balance sheet or execution vulnerabilities that make this target completely uninvestable.
+
+        4. If the status is "❌ PASS (Not Good Enough)":
+           - **Core Investment Thesis:** Focus entirely on structural mediocrity. Explain that while the asset might not go bankrupt tomorrow, it represents a dead-capital trap due to stagnant revenue lines, a narrowing or weak economic moat, or decay in underlying industry lifecycles.
+           - **Key Risks to Identify:** Highlight the risk of opportunity cost—tying up equity capital in low-velocity, deteriorating business profiles with zero macro tailwinds.
 
         Output ONLY the markdown format below. Ensure the layout matches perfectly. Use the specific HTML structure provided below for the Final Recommendation to make it pop out with massive text and clear separation.
 
