@@ -8,7 +8,8 @@ from google.genai.errors import APIError
 # 1. Page Configuration & Styling
 st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
 st.title("📊 European Hidden Gems Research Dashboard")
-st.subheader("Run your proprietary investment framework instantly")
+st.subheader("Run Analysis")
+st.caption("version 1.2")
 
 # 2. Securely Initialize Gemini Client
 if "GEMINI_API_KEY" not in st.secrets:
