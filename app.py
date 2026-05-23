@@ -8,7 +8,7 @@ from google.genai.errors import APIError
 # 1. Page Configuration & Styling
 st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
 st.title("📊 European Hidden Gems Research Dashboard")
-st.subheader("Run Analysis")
+st.subheader("30-Second Analysis: Instantly determine if this business is a Pass, Watchlist, or Deep Dive Asap.")
 st.caption("version 1.2")
 
 # 2. Securely Initialize Gemini Client
@@ -126,7 +126,7 @@ with st.form(key="research_panel_form"):
         "according to Google Finance (e.g., *Robot S.A. EPA:ALROB* or *Archos SA EPA:ALJAC*)."
     )
     
-    submit_button = st.form_submit_button(label="🚀 Run Full Framework Audit")
+    submit_button = st.form_submit_button(label="🚀 Run Analysis")
 
 # 5. Run Analysis Framework Upon Submission
 if submit_button and ticker:
