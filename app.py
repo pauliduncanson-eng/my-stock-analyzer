@@ -99,7 +99,7 @@ if check_password():
             temperature=0.2,
         )
         
-        models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
+        models_to_try = ["gemini-3.5-flash", "gemini-3.5-pro"]
         max_retries = 4
         
         for model_name in models_to_try:
@@ -114,12 +114,12 @@ if check_password():
                     if response and response.text:
                         return response.text
                     else:
-                        retries += 1
+                        retries += 5
                         time.sleep(2)
                         continue
                     
                 except APIError as e:
-                    retries += 1
+                    retries += 5
                     if retries < max_retries:
                         # Exponential backoff: sleep longer on consecutive failures
                         sleep_time = (2 ** retries) + 1
@@ -127,7 +127,7 @@ if check_password():
                         continue
                     break
                 except Exception as e:
-                    retries += 1
+                    retries += 5
                     if retries < max_retries:
                         sleep_time = (2 ** retries) + 1
                         time.sleep(sleep_time)
