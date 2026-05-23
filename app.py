@@ -29,7 +29,7 @@ def generate_analysis_layer(ticker, prompt_text):
         temperature=0.2,
     )
     
-    models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
+    models_to_try = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"]
     max_retries = 3
     
     for model_name in models_to_try:
