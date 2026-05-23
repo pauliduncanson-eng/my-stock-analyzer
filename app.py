@@ -100,7 +100,7 @@ if check_password():
         )
         
         models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
-        max_retries = 3
+        max_retries = 4
         
         for model_name in models_to_try:
             retries = 0
@@ -115,18 +115,24 @@ if check_password():
                         return response.text
                     else:
                         retries += 1
-                        time.sleep(1)
+                        time.sleep(2)
                         continue
                     
                 except APIError as e:
-                    if e.code in [503, 429]:
-                        retries += 1
-                        if retries < max_retries:
-                            sleep_time = 2 ** retries 
-                            time.sleep(sleep_time)
-                            continue
+                    # Catch structural API status codes
+                    retries += 1
+                    if retries < max_retries:
+                        sleep_time = (2 ** retries) + 1
+                        time.sleep(sleep_time)
+                        continue
                     break
-                except Exception:
+                except Exception as e:
+                    # Catch underlying network/wrapper exceptions thrown during intensive search loops
+                    retries += 1
+                    if retries < max_retries:
+                        sleep_time = (2 ** retries) + 1
+                        time.sleep(sleep_time)
+                        continue
                     break
                     
         raise RuntimeError("All upstream analysis engines are currently rate-limited or overloaded by Google. Please wait a moment and try again.")
@@ -401,7 +407,7 @@ if check_password():
             st.markdown(p7_output)
 
         # ==================================================================
-        # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
+        # ⚖️ PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE
         # ==================================================================
         has_moat_narrow_or_mod = contains_any(p2_output, ["narrow", "moderate", "⚖️", "➖"])
         moat_narrowing = contains_any(p2_output, ["narrowing", "decreasing", "eroding", "❌"])
@@ -515,4 +521,3 @@ if check_password():
         st.session_state.current_report = None
         st.session_state.report_ticker = ""
         st.rerun()
-
