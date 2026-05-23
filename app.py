@@ -99,8 +99,8 @@ if check_password():
             temperature=0.2,
         )
         
-        models_to_try = ["gemini-3.5-flash", "gemini-3.5-pro"]
-        max_retries = 4
+        models_to_try = ["Gemini-2-Flash", "Gemini-2-Flash-Lite"]
+        max_retries = 10
         
         for model_name in models_to_try:
             retries = 0
