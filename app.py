@@ -51,6 +51,9 @@ def check_password():
     password_modal()
     st.stop()  # Prevents any downstream dashboard elements from rendering
 
+# 🔥 CRITICAL FIX: You must explicitly execute the check here!
+check_password()
+
 # 📕 PDF GENERATION ENGINE
 
 
