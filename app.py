@@ -11,6 +11,49 @@ st.title("📊 European Hidden Gems Research Dashboard")
 st.subheader("30-Second Analysis: Instantly determine if this business is a Pass, Watchlist, or Deep Dive Asap.")
 st.caption("version 1.2")
 
+# 1. Page Configuration & Styling
+st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
+
+# ==================================================================
+# 🔒 PASSWORD PROTECTION GATEWAY (REFINED MODAL)
+# ==================================================================
+@st.dialog("🔒 Security Access Required", width="small")
+def password_modal():
+    """Renders a secure modal overlay for password validation."""
+    st.write("This proprietary dashboard is reserved for community members.")
+    
+    # Use form container so pressing 'Enter' automatically submits the password
+    with st.form("password_gate_form", clear_on_submit=False):
+        user_password = st.text_input("Enter your access password:", type="password")
+        submit_pass = st.form_submit_button("Unlock Dashboard", use_container_width=True)
+        
+        if submit_pass:
+            if user_password == "GEMS":
+                st.session_state.password_correct = True
+                st.success("🔓 Access Granted!")
+                time.sleep(0.6)
+                st.rerun()
+            elif user_password == "":
+                st.warning("Please enter a password.")
+            else:
+                st.error("❌ Incorrect password. Access Denied.")
+
+def check_password():
+    """Main lifecycle check to guarantee access controls remain active."""
+    if "password_correct" not in st.session_state:
+        st.session_state.password_correct = False
+
+    # If already verified, exit quietly and let the dashboard render
+    if st.session_state.password_correct:
+        return True
+
+    # If unverified, trigger the secure modal overlay and halt background execution
+    password_modal()
+    st.stop()  # Prevents any downstream dashboard elements from rendering
+
+# 📕 PDF GENERATION ENGINE
+
+
 # 2. Securely Initialize Gemini Client
 if "GEMINI_API_KEY" not in st.secrets:
     st.error("Error: GEMINI_API_KEY is missing from your Streamlit Advanced Settings / Secrets.")
