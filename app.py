@@ -6,13 +6,6 @@ from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 
-# Import Anthropic SDK for seamless multi-provider fallback
-try:
-    from anthropic import Anthropic
-except ImportError:
-    st.error("The 'anthropic' package is required for the fallback engine. Please add 'anthropic' to your requirements.txt.")
-    st.stop()
-
 # Document Generation Library
 from fpdf import FPDF
 
@@ -54,7 +47,7 @@ def make_pdf(ticker, content_dict):
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # Header Styling (Core fonts don't support full emoji sets)
+    # Header Styling
     pdf.set_font("Helvetica", "B", 16)
     pdf.cell(0, 10, f"European Hidden Gems Report: {ticker}", ln=True, align="C")
     pdf.ln(5)
@@ -98,7 +91,7 @@ if check_password():
 
     client = get_gemini_client()
 
-    # 3. Optimized API Call Wrapper with Anthropic Multi-Provider Fallback
+    # 3. Optimized API Call Wrapper with Native Backoff Retries
     @st.cache_data(show_spinner=False)
     def generate_analysis_layer(ticker, prompt_text):
         config = types.GenerateContentConfig(
@@ -108,9 +101,6 @@ if check_password():
         
         models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
         max_retries = 4
-        
-        # Keep track of whether we encountered an explicit upstream overload/rate-limit error
-        trigger_fallback = False
         
         for model_name in models_to_try:
             retries = 0
@@ -129,70 +119,22 @@ if check_password():
                         continue
                     
                 except APIError as e:
-                    # Check if the APIError matches rate-limiting, resource exhaustion, or service overload status codes
-                    error_str = str(e).lower()
-                    if "429" in error_str or "rate_limit" in error_str or "exhausted" in error_str or "overloaded" in error_str or "503" in error_str:
-                        trigger_fallback = True
-                        break # Break the retry loop to immediately pass control down to the Anthropic engine
-                    
                     retries += 1
                     if retries < max_retries:
+                        # Exponential backoff: sleep longer on consecutive failures
                         sleep_time = (2 ** retries) + 1
                         time.sleep(sleep_time)
                         continue
                     break
                 except Exception as e:
-                    # Catch underlying network/wrapper exceptions thrown during intensive search loops
-                    error_str = str(e).lower()
-                    if "rate-limited" in error_str or "overloaded" in error_str or "429" in error_str or "503" in error_str:
-                        trigger_fallback = True
-                        break # Break retry loop to forward execution straight to Anthropic
-                        
                     retries += 1
                     if retries < max_retries:
                         sleep_time = (2 ** retries) + 1
                         time.sleep(sleep_time)
                         continue
                     break
-            
-            # If a rate limit was detected, avoid spinning through the other Gemini model to save runtime execution time
-            if trigger_fallback:
-                break
-
-        # ==================================================================
-        # 🛡️ ANTHROPIC FALLBACK ENGINE
-        # ==================================================================
-        # This executes seamlessly if Google returns a rate limit error or exhausts all retries
-        if trigger_fallback or "ANTHROPIC_API_KEY" in st.secrets:
-            st.warning("⚠️ Google analysis engines are currently rate-limited. Routing request to Anthropic Claude 3.5 Sonnet fallback...")
-            
-            if "ANTHROPIC_API_KEY" not in st.secrets:
-                raise RuntimeError("Google engines are overloaded and ANTHROPIC_API_KEY is missing from Streamlit Secrets.")
-            
-            try:
-                anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-                
-                # Append context instructions to guide Claude safely through the expected structural formatting outputs
-                enhanced_prompt = (
-                    f"{prompt_text}\n\n"
-                    "CRITICAL FALLBACK OPERATIONAL DIRECTIVE: Since you are replacing a primary search model, use your core internal financial "
-                    "knowledge base updated to 2026 to execute this query for the ticker. You must match the required template formatting instructions "
-                    "identically. Do not include any introductory remarks, conversational greetings, or closing text."
-                )
-                
-                message = anthropic_client.messages.create(
-                    model="claude-3-5-sonnet-latest",
-                    max_tokens=4000,
-                    temperature=0.2,
-                    messages=[{"role": "user", "content": enhanced_prompt}]
-                )
-                
-                if message.content and len(message.content) > 0:
-                    return message.content[0].text
-            except Exception as anthropic_err:
-                raise RuntimeError(f"Both Google and Anthropic engines failed. Anthropic error: {anthropic_err}")
-                
-        raise RuntimeError("All upstream analysis engines are currently rate-limited or overloaded by Google. Please wait a moment and try again.")
+                    
+        raise RuntimeError("The analysis engine experienced high demand or rate limits. Please wait a moment and try running this ticker again.")
 
     def extract_phase_number(text):
         if not text:
@@ -303,7 +245,7 @@ if check_password():
         st.caption(f"🤖 System localized corporate baseline structure to: **Phase {phase_num}**")
 
         # ==================================================================
-        # 🏎️ BATCH 2: Core Analysis Macro-Prompt
+        # 👑 BATCH 2: Core Analysis Macro-Prompt
         # ==================================================================
         macro_analysis_output = ""
         with st.spinner("⚡ Running Deep-Search Core Analysis Engine..."):
@@ -543,7 +485,6 @@ if check_password():
         # ==================================================================
         # 💾 EXPORT & SESSION STATE LAYER
         # ==================================================================
-        # Package data into state to survive interface interactions
         st.session_state.current_report = {
             "Phase Analysis": phase_output,
             "Moat Analysis": p2_output,
