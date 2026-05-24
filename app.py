@@ -573,20 +573,52 @@ if "ticker_analyzed" in st.session_state:
     def clean_text_for_pdf(text):
         if not text:
             return ""
-        # Strip HTML and basic Markdown syntax
+        
+        # 1. Strip HTML and basic Markdown formatting syntax Clutter
         text = re.sub(r'<[^>]*>', '', text)
         text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
-        text = text.replace("🟩", "[Green]").replace("🟨", "[Yellow]").replace("🟥", "[Red]")
-        text = text.replace("✅", "[Pass]").replace("❌", "[Fail]").replace("➖", "[-]").replace("⚖️", "[Moat]")
-        text = text.replace("🟢", "[O]").replace("🟡", "[O]").replace("🔴", "[O]").replace("⚫", "[O]")
-        text = text.replace("⬆️", "[Up]").replace("⬇️", "[Down]")
+        text = text.replace("---", "\n" + "-"*40 + "\n")
         
-        # Standardize curly quotes and long dashes which break Latin-1 default maps
+        # 2. Aggressive Character Translation Mapping Matrix (Prevents conversion to '?')
+        symbol_mappings = {
+            # Box Status Colors
+            "🟩": "[Green]", "🟨": "[Yellow]", "🟥": "[Red]", "🟪": "[Purple]", "🟫": "[Brown]",
+            # Circle Status Indicators
+            "🟢": "(Good)", "🟡": "(Average)", "🔴": "(Weak)", "⚫": "(N/A)",
+            # Pass/Fail Markers
+            "✅": "[PASS]", "❌": "[FAIL]", "➖": "[-]", "⚖️": "[MOAT]", "🏰": "[MOAT]",
+            # Operational Pillars
+            "🚀": "[GROWTH]", "⚠️": "[RISK]", "📊": "[DATA]", "🔬": "[ANALYSIS]",
+            "🎯": "[TARGET]", "📋": "[REPORT]", "🔗": "[LINK]", "📎": "[SOURCE]",
+            "⚙️": "[SYSTEM]", "🔒": "[SECURE]", "🔓": "[UNLOCK]", "⏳": "[WATCHLIST]",
+            # Complex/Compound Risk Metaphors
+            "🥚🧺": "[Concentration Risk]", "🥷": "[Disruption Risk]", "🕵️": "[External Risk]", 
+            "👥": "[Competition/Network]", "🏭": "[Production]", "⚓": "[Switching Costs]",
+            "🏆": "[Intangibles]", "🌍": "[Expansion]", "🧪": "[Innovation]", "🤖": "[Tech]",
+            "💸": "[Cash Flow]", "🏦": "[Balance Sheet]", "🪙": "[Crypto]", "💰": "[Valuation]",
+            "🧠": "[SYNTHESIS]", "👑": "[CHIEF]", "⚡": "[CORE]", "🧭": "[PHASE]",
+            # Trend and Velocity Controls
+            "⬆️": "[UP/ACCELERATING]", "⬇️": "[DOWN/DECELERATING]", "➡": "[-]",
+            # Common Bullet and Numbered List Variances from AI Output
+            "•": "-", "▪": "-", "◦": "-", "‣": "-",
+            "①": "(1)", "②": "(2)", "③": "(3)", "④": "(4)", "⑤": "(5)",
+            "⑥": "(6)", "⑦": "(7)", "⑧": "(8)", "⑨": "(9)", "⑩": "(10)"
+        }
+        
+        for symbol, text_replacement in symbol_mappings.items():
+            text = text.replace(symbol, text_replacement)
+            
+        # 3. Standardize corporate punctuation and typography that break Latin-1 default maps
         text = text.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
-        text = text.replace("—", "-").replace("–", "-")
+        text = text.replace("—", "-").replace("–", "-").replace("…", "...")
         
-        # Safe strict encoding fallbacks to protect FPDF layout rendering
-        return text.encode('latin-1', 'replace').decode('latin-1')
+        # 4. Final strict encoding verification pass
+        text_encoded = text.encode('latin-1', 'replace').decode('latin-1')
+        
+        # 5. Clean up any loose trailing question marks created by unexpected characters
+        text_encoded = text_encoded.replace("??", " ").replace(" ?", " ")
+        
+        return text_encoded
 
     def build_pdf_document():
         pdf = FPDF()
@@ -624,10 +656,10 @@ if "ticker_analyzed" in st.session_state:
         return bytes(pdf.output(dest="S"))
 
     # ==================================================================
-    # BUTTON STACKING LAYOUT (Stacked vertically instead of columns)
+    # VERTICALLY STACKED ACTION CONTROLS
     # ==================================================================
     
-    # 1. Clear Ticker & Start New Search Button (Placed on Top)
+    # Action 1: Clear Ticker & Start New Search (Top Row)
     if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
         # Target the keys we injected for this specific company session run and evict them
         keys_to_clear = ["ticker_analyzed", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p8"]
@@ -636,10 +668,10 @@ if "ticker_analyzed" in st.session_state:
                 del st.session_state[key]
         st.rerun()
 
-    # Add a small padding space between buttons
-    st.write("") 
+    # Layout Spacing Spacer
+    st.write("")
 
-    # 2. Download Research Portfolio PDF Button (Placed underneath)
+    # Action 2: Download PDF Report Package (Bottom Row)
     try:
         pdf_data = build_pdf_document()
         st.download_button(
