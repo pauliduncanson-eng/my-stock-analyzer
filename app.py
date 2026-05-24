@@ -567,7 +567,7 @@ if submit_button and ticker:
 # ==================================================================
 if "ticker_analyzed" in st.session_state:
     st.write("---")
-    st.subheader("📥 Actions & Export Center")
+    st.subheader("📥 Actions")
     
     # Helper to clean markdown syntax & HTML wrappers safely from raw text strings
     def clean_text_for_pdf(text):
