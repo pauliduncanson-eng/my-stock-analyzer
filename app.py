@@ -596,7 +596,7 @@ if "ticker_analyzed" in st.session_state:
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, clean_text_for_pdf(f"Research Report: {st.session_state['ticker_analyzed']}"), ln=True, align="C")
         pdf.set_font("Helvetica", "I", 10)
-        pdf.cell(0, 5, "Generated via European Hidden Gems Research Framework Dashboard", ln=True, align="C")
+        pdf.cell(0, 5, "Generated via European Hidden Gems Research Framework Dashboard v1.2", ln=True, align="C")
         pdf.ln(10)
         
         panels_to_print = [
