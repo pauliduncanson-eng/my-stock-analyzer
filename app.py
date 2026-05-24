@@ -570,22 +570,49 @@ if "ticker_analyzed" in st.session_state:
     st.subheader("📥 Actions & Export Center")
     
     # Helper to clean markdown syntax & HTML wrappers safely from raw text strings
-    def clean_text_for_pdf(text):
-        if not text:
-            return ""
-        # Strip HTML and basic Markdown syntax
-        text = re.sub(r'<[^>]*>', '', text)
-        text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
-        text = text.replace("🟩", "[Green]").replace("🟨", "[Yellow]").replace("🟥", "[Red]")
-        text = text.replace("✅", "[Pass]").replace("❌", "[Fail]").replace("➖", "[-]").replace("⚖️", "[Moat]")
-        text = text.replace("🟢", "[O]").replace("🟡", "[O]").replace("🔴", "[O]").replace("⚫", "[O]")
-        text = text.replace("⬆️", "[Up]").replace("⬇️", "[Down]")
+   def clean_text_for_pdf(text):
+    if not text:
+        return ""
+    
+    # 1. Strip HTML tags cleanly
+    text = re.sub(r'<[^>]*>', '', text)
+    
+    # 2. Clean common markdown syntax clutter
+    text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
+    text = text.replace("---", "\n" + "-"*40 + "\n") # replace markdown separators with plain dashes
+    
+    # 3. Aggressively map emojis/symbols to text equivalents so they don't turn into '?'
+    symbol_mappings = {
+        "🟩": "[Green]", "🟨": "[Yellow]", "🟥": "[Red]", "🟪": "[Purple]", "🟫": "[Brown]",
+        "🟢": "(Good)", "🟡": "(Average)", "🔴": "(Weak)", "⚫": "(N/A)",
+        "✅": "[PASS]", "❌": "[FAIL]", "➖": "[-]", "⚖️": "[MOAT]", "🏰": "[MOAT]",
+        "🚀": "[GROWTH]", "⚠️": "[RISK]", "📊": "[DATA]", "🔬": "[ANALYSIS]",
+        "🎯": "[TARGET]", "📋": "[REPORT]", "🔗": "[LINK]", "📎": "[SOURCE]",
+        "⚙️": "[SYSTEM]", "🔒": "[SECURE]", "🔓": "[UNLOCK]", "⏳": "[WATCHLIST]",
+        "🥚🧺": "[Concentration Risk]", "🥷": "[Disruption Risk]", "🕵️": "[External Risk]", 
+        "👥": "[Competition/Network]", "🏭": "[Production]", "⚓": "[Switching Costs]",
+        "🏆": "[Intangibles]", "🌍": "[Expansion]", "🧪": "[Innovation]", "🤖": "[Tech]",
+        "💸": "[Cash Flow]", "🏦": "[Balance Sheet]", "🪙": "[Crypto]", "💰": "[Valuation]",
+        "⬆️": "[UP/ACCELERATING]", "⬇️": "[DOWN/DECELERATING]", "⚡": "[CORE]", "🧭": "[PHASE]",
+        "🧠": "[SYNTHESIS]", "👑": "[CHIEF]"
+    }
+    
+    for symbol, text_replacement in symbol_mappings.items():
+        text = text.replace(symbol, text_replacement)
         
-        # Standardize curly quotes and long dashes which break Latin-1 default maps
-        text = text.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
-        text = text.replace("—", "-").replace("–", "-")
-        
-        # Safe strict encoding fallbacks to protect FPDF layout rendering
+    # 4. Standardize corporate punctuation and curly brackets/quotes that crash Latin-1
+    text = text.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+    text = text.replace("—", "-").replace("–", "-").replace("…", "...")
+    
+    # 5. Fallback string encoder to safely purge remaining illegal characters
+    # This prevents any unexpected character from crashing the script
+    text_encoded = text.encode('latin-1', 'replace').decode('latin-1')
+    
+    # Optional cleanup: Replace the fallback question marks left by encoding on any leftover emojis
+    # so they read cleaner visually in the final file export
+    text_encoded = text_encoded.replace("??", " ") 
+    
+    return text_encoded
         return text.encode('latin-1', 'replace').decode('latin-1')
 
     def build_pdf_document():
