@@ -621,7 +621,7 @@ if "ticker_analyzed" in st.session_state:
             pdf.multi_cell(0, 5, cleaned_body)
             pdf.ln(6)
             
-        return pdf.output(dest="S")
+        return bytes(pdf.output(dest="S"))
 
     # Generate layout columns for side-by-side action controls
     col_actions_left, col_actions_right = st.columns(2)
