@@ -4,15 +4,13 @@ import time
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
+from fpdf import FPDF
 
 # 1. Page Configuration & Styling
 st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
 st.title("📊 European Hidden Gems Research Dashboard")
 st.subheader("30-Second Analysis: Instantly determine if this business is a Pass, Watchlist, or Deep Dive Asap.")
 st.caption("version 1.2")
-
-# 1. Page Configuration & Styling
-st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
 
 # ==================================================================
 # 🔒 PASSWORD PROTECTION GATEWAY (REFINED MODAL)
@@ -53,9 +51,6 @@ def check_password():
 
 # 🔥 CRITICAL FIX: You must explicitly execute the check here!
 check_password()
-
-# 📕 PDF GENERATION ENGINE
-
 
 # 2. Securely Initialize Gemini Client
 if "GEMINI_API_KEY" not in st.secrets:
@@ -192,9 +187,9 @@ if submit_button and ticker:
         Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template. It is vital you include the exact phrase 'Phase X' (where X is 1-5) in your 'Identified Phase' field.
 
         # 🧭 Business Phase Analysis: [Company Name] ({ticker})
-        
+         
         ### Identified Phase: Phase [Phase Number] - [Phase Name]
-        
+         
         **Confidence Level:** [High / Medium / Low]
 
         ### 📊 Phase Diagnostic Matrix
@@ -231,7 +226,7 @@ if submit_button and ticker:
 
         === PANEL_2_START ===
         # 🏰 MOAT ANALYSIS: [Company Name] ({ticker})
-        
+         
         <h4 style='margin-bottom: 0px;'>Moat size: [Select one: None ❌, Narrow ➖, Moderate ⚖️, Wide ✅]</h4>
         <h4 style='margin-top: 5px; margin-bottom: 20px;'>Moat direction: [Select one: Widening ✅ / Stable ➖ / Narrowing ❌]</h4>
 
@@ -255,10 +250,10 @@ if submit_button and ticker:
 
         === PANEL_3_START ===
         # 🚀 Future Growth Analysis: [Company Name] ({ticker}) 
-        
+         
         ### Future Growth Potential: [Select one: High ✅ / Moderate ➖ / Low ❌]
         ### Future Growth Direction: [Select one: Accelerating ✅ / Stable ➖ / Decelerating ❌]
-        
+         
         **Evidence Summary:** [1–2 sentence narrative supported by a defining corporate growth metric citation.] 
 
         ## 🌍 Market Expansion
@@ -297,7 +292,7 @@ if submit_button and ticker:
         # 📊 Financial Health Analysis: [Company Name] ({ticker})
         ## ✅ Overall Summary
         - **Overall Financial Health:** [Strong / Moderate / Weak / Okay]
-        
+         
         ## 🔍 Detailed Analysis 
         ### 📋 Income Statement
         - **Revenue Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
@@ -505,7 +500,7 @@ if submit_button and ticker:
         CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialize the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
-        
+         
         MANDATORY DESIGNATION: {calculated_status}
         SYSTEM REASONING: {rule_justification}
 
@@ -547,19 +542,92 @@ if submit_button and ticker:
 
         ### 🛠️ Required Next Steps
         - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
-        - **Trigger Condition:** [Define a clear operational or valuation trigger to either archive, monitor, or buy this stock.]
+        - **Trigger Condition:** [Define a clear operational or valuation parameter trigger to change position status.]
         """
         try:
-            final_decision = generate_analysis_layer(ticker, p8_prompt)
-            st.markdown(final_decision, unsafe_allow_html=True)
+            p8_output = generate_analysis_layer(ticker, p8_prompt)
+            st.markdown(p8_output, unsafe_allow_html=True)
         except Exception as e:
-            st.error(f"Error executing Panel 8 Logic Layer: {e}")
+            st.error(f"Error executing Panel 8: {e}")
+            p8_output = f"Final Recommendation: {calculated_status}\nReasoning: {rule_justification}"
 
-    st.success("✅ Full Framework Audit complete. Final recommendation engine active.")
+    # Save data arrays explicitly to Session State to keep them available for the PDF builder
+    st.session_state["ticker_analyzed"] = ticker
+    st.session_state["pdf_p1"] = phase_output
+    st.session_state["pdf_p2"] = p2_output
+    st.session_state["pdf_p3"] = p3_output
+    st.session_state["pdf_p4"] = p4_output
+    st.session_state["pdf_p5"] = p5_output
+    st.session_state["pdf_p6"] = p6_output
+    st.session_state["pdf_p7"] = p7_output
+    st.session_state["pdf_p8"] = p8_output
 
-# ------------------------------------------------------------------
-# 🔄 RESET RUNTIME CONTROLS
-# ------------------------------------------------------------------
-st.write("---")
-if st.button("🔄 Clear Dashboard & Run New Ticker"):
-    st.rerun()
+# ==================================================================
+# 📥 EXPORT ENGINE (RETAINING OUTPUT IN SESSION RUNTIMES)
+# ==================================================================
+if "ticker_analyzed" in st.session_state:
+    st.write("---")
+    st.subheader("📥 Export Comprehensive Research Report")
+    
+    # Helper to clean markdown syntax & HTML wrappers from raw text strings
+    def clean_text_for_pdf(text):
+        if not text:
+            return ""
+        # Remove markdown weight markers and basic inline structural symbols
+        text = re.sub(r'<[^>]*>', '', text)
+        text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
+        text = text.replace("🟩", "[Green]").replace("🟨", "[Yellow]").replace("🟥", "[Red]")
+        text = text.replace("✅", "[Pass]").replace("❌", "[Fail]").replace("➖", "[-]").replace("⚖️", "[Moat]")
+        text = text.replace("🟢", "[O]").replace("🟡", "[O]").replace("🔴", "[O]").replace("⚫", "[O]")
+        text = text.replace("⬆️", "[Up]").replace("⬇️", "[Down]")
+        return text
+
+    # Compile the final report matching standard A4 dimensions
+    def build_pdf_document():
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        
+        # Cover header line elements
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, f"Research Report: {st.session_state['ticker_analyzed']}", ln=True, align="C")
+        pdf.set_font("Helvetica", "I", 10)
+        pdf.cell(0, 5, "Generated via European Hidden Gems Research Framework Dashboard", ln=True, align="C")
+        pdf.ln(10)
+        
+        panels_to_print = [
+            ("1. Business Phase Analysis", st.session_state["pdf_p1"]),
+            ("2. Competitive Moat Analysis", st.session_state["pdf_p2"]),
+            ("3. Future Growth Analysis", st.session_state["pdf_p3"]),
+            ("4. Core Diagnostic Benchmarking", st.session_state["pdf_p4"]),
+            ("5. Execution Risk Analysis", st.session_state["pdf_p5"]),
+            ("6. Financial Health Analysis", st.session_state["pdf_p6"]),
+            ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
+            ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
+        ]
+        
+        for section_title, analytical_content in panels_to_print:
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(0, 8, section_title, ln=True)
+            pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 190, pdf.get_y())
+            pdf.ln(2)
+            
+            cleaned_body = clean_text_for_pdf(analytical_content)
+            pdf.set_font("Helvetica", "", 10)
+            # Use multi_cell to handle sentence structural wraps cleanly across line metrics
+            pdf.multi_cell(0, 5, cleaned_body)
+            pdf.ln(6)
+            
+        return pdf.output(dest="S")
+
+    try:
+        pdf_data = build_pdf_document()
+        st.download_button(
+            label="📥 Download Research Analysis Portfolio (PDF)",
+            data=pdf_data,
+            file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+    except Exception as pdf_err:
+        st.error(f"Could not build report download package: {pdf_err}")
