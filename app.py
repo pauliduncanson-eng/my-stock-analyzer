@@ -623,28 +623,31 @@ if "ticker_analyzed" in st.session_state:
             
         return bytes(pdf.output(dest="S"))
 
-    # Generate layout columns for side-by-side action controls
-    col_actions_left, col_actions_right = st.columns(2)
+    # ==================================================================
+    # BUTTON STACKING LAYOUT (Stacked vertically instead of columns)
+    # ==================================================================
+    
+    # 1. Clear Ticker & Start New Search Button (Placed on Top)
+    if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
+        # Target the keys we injected for this specific company session run and evict them
+        keys_to_clear = ["ticker_analyzed", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p8"]
+        for key in keys_to_clear:
+            if key in st.session_state:
+                del st.session_state[key]
+        st.rerun()
 
-    with col_actions_left:
-        try:
-            pdf_data = build_pdf_document()
-            st.download_button(
-                label="📥 Download Research Portfolio (PDF)",
-                data=pdf_data,
-                file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-        except Exception as pdf_err:
-            st.error(f"Could not build report download package: {pdf_err}")
+    # Add a small padding space between buttons
+    st.write("") 
 
-    with col_actions_right:
-        # RESTORED REFRESH AND RESET ROUTINE
-        if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
-            # Target the keys we injected for this specific company session run and evict them
-            keys_to_clear = ["ticker_analyzed", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p8"]
-            for key in keys_to_clear:
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.rerun()
+    # 2. Download Research Portfolio PDF Button (Placed underneath)
+    try:
+        pdf_data = build_pdf_document()
+        st.download_button(
+            label="📥 Download Research Portfolio (PDF)",
+            data=pdf_data,
+            file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+    except Exception as pdf_err:
+        st.error(f"Could not build report download package: {pdf_err}")
