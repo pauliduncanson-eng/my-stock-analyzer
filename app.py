@@ -678,7 +678,7 @@ if "ticker_analyzed" in st.session_state:
     try:
         pdf_data = build_pdf_document()
         st.download_button(
-            label="📥 Download Research Portfolio (PDF)",
+            label="📥 Download PDF",
             data=pdf_data,
             file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
             mime="application/pdf",
