@@ -269,7 +269,7 @@ if submit_button and ticker:
         ---
 
         === PANEL_5_START ===
-        # ⚠️ Execution Risk Analysis: [Company Name] ({ticker})
+        # ⚠️ Risk Analysis: [Company Name] ({ticker})
         ## 📊 Overall Summary
         - **Overall Risk Level:** [High Risk 🔴 / Medium Risk 🟡 / Low Risk 🟢]
         - **⚠️ Primary Risk Factors:** [List the highest risk pillars]
@@ -560,4 +560,91 @@ if submit_button and ticker:
     st.session_state["pdf_p5"] = p5_output
     st.session_state["pdf_p6"] = p6_output
     st.session_state["pdf_p7"] = p7_output
-    st.session_state["pdf_p8"]
+    st.session_state["pdf_p8"] = p8_output
+
+# ==================================================================
+# 📥 EXPORT & MANAGEMENT ENGINE (RETAINING OUTPUT IN RUNTIMES)
+# ==================================================================
+if "ticker_analyzed" in st.session_state:
+    st.write("---")
+    st.subheader("📥 Actions & Export Center")
+    
+    # Helper to clean markdown syntax & HTML wrappers safely from raw text strings
+    def clean_text_for_pdf(text):
+        if not text:
+            return ""
+        # Strip HTML and basic Markdown syntax
+        text = re.sub(r'<[^>]*>', '', text)
+        text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
+        text = text.replace("🟩", "[Green]").replace("🟨", "[Yellow]").replace("🟥", "[Red]")
+        text = text.replace("✅", "[Pass]").replace("❌", "[Fail]").replace("➖", "[-]").replace("⚖️", "[Moat]")
+        text = text.replace("🟢", "[O]").replace("🟡", "[O]").replace("🔴", "[O]").replace("⚫", "[O]")
+        text = text.replace("⬆️", "[Up]").replace("⬇️", "[Down]")
+        
+        # Standardize curly quotes and long dashes which break Latin-1 default maps
+        text = text.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+        text = text.replace("—", "-").replace("–", "-")
+        
+        # Safe strict encoding fallbacks to protect FPDF layout rendering
+        return text.encode('latin-1', 'replace').decode('latin-1')
+
+    def build_pdf_document():
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, clean_text_for_pdf(f"Research Report: {st.session_state['ticker_analyzed']}"), ln=True, align="C")
+        pdf.set_font("Helvetica", "I", 10)
+        pdf.cell(0, 5, "Generated via European Hidden Gems Research Framework Dashboard", ln=True, align="C")
+        pdf.ln(10)
+        
+        panels_to_print = [
+            ("1. Business Phase Analysis", st.session_state["pdf_p1"]),
+            ("2. Competitive Moat Analysis", st.session_state["pdf_p2"]),
+            ("3. Future Growth Analysis", st.session_state["pdf_p3"]),
+            ("4. Core Diagnostic Benchmarking", st.session_state["pdf_p4"]),
+            ("5. Execution Risk Analysis", st.session_state["pdf_p5"]),
+            ("6. Financial Health Analysis", st.session_state["pdf_p6"]),
+            ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
+            ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
+        ]
+        
+        for section_title, analytical_content in panels_to_print:
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(0, 8, clean_text_for_pdf(section_title), ln=True)
+            pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 190, pdf.get_y())
+            pdf.ln(2)
+            
+            cleaned_body = clean_text_for_pdf(analytical_content)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.multi_cell(0, 5, cleaned_body)
+            pdf.ln(6)
+            
+        return bytes(pdf.output(dest="S"))
+
+    # Generate layout columns for side-by-side action controls
+    col_actions_left, col_actions_right = st.columns(2)
+
+    with col_actions_left:
+        try:
+            pdf_data = build_pdf_document()
+            st.download_button(
+                label="📥 Download Research Portfolio (PDF)",
+                data=pdf_data,
+                file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        except Exception as pdf_err:
+            st.error(f"Could not build report download package: {pdf_err}")
+
+    with col_actions_right:
+        # RESTORED REFRESH AND RESET ROUTINE
+        if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
+            # Target the keys we injected for this specific company session run and evict them
+            keys_to_clear = ["ticker_analyzed", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p8"]
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.rerun()
