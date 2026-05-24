@@ -269,7 +269,7 @@ if submit_button and ticker:
         ---
 
         === PANEL_5_START ===
-        # ⚠️ Execution Risk Analysis: [Company Name] ({ticker})
+        # ⚠️ Risk Analysis: [Company Name] ({ticker})
         ## 📊 Overall Summary
         - **Overall Risk Level:** [High Risk 🔴 / Medium Risk 🟡 / Low Risk 🟢]
         - **⚠️ Primary Risk Factors:** [List the highest risk pillars]
