@@ -569,17 +569,24 @@ if "ticker_analyzed" in st.session_state:
     st.write("---")
     st.subheader("📥 Actions & Export Center")
     
-    # Helper to clean markdown syntax & HTML wrappers from raw text strings
+    # Helper to clean markdown syntax & HTML wrappers safely from raw text strings
     def clean_text_for_pdf(text):
         if not text:
             return ""
+        # Strip HTML and basic Markdown syntax
         text = re.sub(r'<[^>]*>', '', text)
         text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
         text = text.replace("🟩", "[Green]").replace("🟨", "[Yellow]").replace("🟥", "[Red]")
         text = text.replace("✅", "[Pass]").replace("❌", "[Fail]").replace("➖", "[-]").replace("⚖️", "[Moat]")
         text = text.replace("🟢", "[O]").replace("🟡", "[O]").replace("🔴", "[O]").replace("⚫", "[O]")
         text = text.replace("⬆️", "[Up]").replace("⬇️", "[Down]")
-        return text
+        
+        # Standardize curly quotes and long dashes which break Latin-1 default maps
+        text = text.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+        text = text.replace("—", "-").replace("–", "-")
+        
+        # Safe strict encoding fallbacks to protect FPDF layout rendering
+        return text.encode('latin-1', 'replace').decode('latin-1')
 
     def build_pdf_document():
         pdf = FPDF()
@@ -587,7 +594,7 @@ if "ticker_analyzed" in st.session_state:
         pdf.add_page()
         
         pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, f"Research Report: {st.session_state['ticker_analyzed']}", ln=True, align="C")
+        pdf.cell(0, 10, clean_text_for_pdf(f"Research Report: {st.session_state['ticker_analyzed']}"), ln=True, align="C")
         pdf.set_font("Helvetica", "I", 10)
         pdf.cell(0, 5, "Generated via European Hidden Gems Research Framework Dashboard", ln=True, align="C")
         pdf.ln(10)
@@ -605,7 +612,7 @@ if "ticker_analyzed" in st.session_state:
         
         for section_title, analytical_content in panels_to_print:
             pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 8, section_title, ln=True)
+            pdf.cell(0, 8, clean_text_for_pdf(section_title), ln=True)
             pdf.line(pdf.get_x(), pdf.get_y(), pdf.get_x() + 190, pdf.get_y())
             pdf.ln(2)
             
@@ -633,7 +640,7 @@ if "ticker_analyzed" in st.session_state:
             st.error(f"Could not build report download package: {pdf_err}")
 
     with col_actions_right:
-        # 🔥 RESTORED REFRESH AND RESET ROUTINE
+        # RESTORED REFRESH AND RESET ROUTINE
         if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
             # Target the keys we injected for this specific company session run and evict them
             keys_to_clear = ["ticker_analyzed", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p8"]
