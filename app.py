@@ -563,17 +563,16 @@ if submit_button and ticker:
     st.session_state["pdf_p8"] = p8_output
 
 # ==================================================================
-# 📥 EXPORT ENGINE (RETAINING OUTPUT IN SESSION RUNTIMES)
+# 📥 EXPORT & MANAGEMENT ENGINE (RETAINING OUTPUT IN RUNTIMES)
 # ==================================================================
 if "ticker_analyzed" in st.session_state:
     st.write("---")
-    st.subheader("📥 Export Comprehensive Research Report")
+    st.subheader("📥 Actions & Export Center")
     
     # Helper to clean markdown syntax & HTML wrappers from raw text strings
     def clean_text_for_pdf(text):
         if not text:
             return ""
-        # Remove markdown weight markers and basic inline structural symbols
         text = re.sub(r'<[^>]*>', '', text)
         text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
         text = text.replace("🟩", "[Green]").replace("🟨", "[Yellow]").replace("🟥", "[Red]")
@@ -582,13 +581,11 @@ if "ticker_analyzed" in st.session_state:
         text = text.replace("⬆️", "[Up]").replace("⬇️", "[Down]")
         return text
 
-    # Compile the final report matching standard A4 dimensions
     def build_pdf_document():
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
         
-        # Cover header line elements
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, f"Research Report: {st.session_state['ticker_analyzed']}", ln=True, align="C")
         pdf.set_font("Helvetica", "I", 10)
@@ -614,20 +611,33 @@ if "ticker_analyzed" in st.session_state:
             
             cleaned_body = clean_text_for_pdf(analytical_content)
             pdf.set_font("Helvetica", "", 10)
-            # Use multi_cell to handle sentence structural wraps cleanly across line metrics
             pdf.multi_cell(0, 5, cleaned_body)
             pdf.ln(6)
             
         return pdf.output(dest="S")
 
-    try:
-        pdf_data = build_pdf_document()
-        st.download_button(
-            label="📥 Download Research Analysis Portfolio (PDF)",
-            data=pdf_data,
-            file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-    except Exception as pdf_err:
-        st.error(f"Could not build report download package: {pdf_err}")
+    # Generate layout columns for side-by-side action controls
+    col_actions_left, col_actions_right = st.columns(2)
+
+    with col_actions_left:
+        try:
+            pdf_data = build_pdf_document()
+            st.download_button(
+                label="📥 Download Research Portfolio (PDF)",
+                data=pdf_data,
+                file_name=f"{st.session_state['ticker_analyzed']}_Hidden_Gems_Analysis.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        except Exception as pdf_err:
+            st.error(f"Could not build report download package: {pdf_err}")
+
+    with col_actions_right:
+        # 🔥 RESTORED REFRESH AND RESET ROUTINE
+        if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
+            # Target the keys we injected for this specific company session run and evict them
+            keys_to_clear = ["ticker_analyzed", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p8"]
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.rerun()
