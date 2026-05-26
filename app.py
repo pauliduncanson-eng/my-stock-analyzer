@@ -414,37 +414,44 @@ if submit_button and ticker:
     with st.expander("💰 Business Valuation Analysis", expanded=True):
         st.markdown(p7_output)
 
-   # ==================================================================
-    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Nuance Refined)
+    # ==================================================================
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Robust Realignment)
     # ==================================================================
     
-    # 1. Linguistic Parsing & Feature Extraction via Emoji and Text Patterns
-    # Scan Panel 4 for specific row ratings
-    p4_lower = p4_output.lower()
-    rev_growth_red = "revenue growth" in p4_lower and "🔴" in p4_lower.split("revenue growth")[1].split("\n")[0]
-    dilution_red = "shareholder alignment" in p4_lower and "🔴" in p4_lower.split("shareholder alignment")[1].split("\n")[0]
-    dilution_green = "shareholder alignment" in p4_lower and "🟢" in p4_lower.split("shareholder alignment")[1].split("\n")[0]
+    # 1. Clean Metric Array Parsing (Splitting by lines to guarantee position matches)
+    p4_lines = [line.lower() for line in p4_output.split("\n") if "|" in line]
     
-    # Count overall traffic lights in Panel 4
-    p4_red_count = p4_output.count("🔴")
-    p4_yellow_count = p4_output.count("🟡")
-    p4_green_count = p4_output.count("🟢")
-    total_p4_metrics = p4_red_count + p4_yellow_count + p4_green_count if (p4_red_count + p4_yellow_count + p4_green_count) > 0 else 5
-    p4_green_ratio = p4_green_count / total_p4_metrics
+    # Defaults in case layout has minor string variances
+    rev_growth_color = "🟡"
+    margin_color = "🟡"
+    efficiency_color = "🟡"
+    asset_color = "🟡"
+    alignment_color = "🟡"
 
-    # Scan Panel 7 for Valuation Status
+    # Mechanically map rows by filtering text matches
+    for line in p4_lines:
+        if "revenue" in line:
+            rev_growth_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
+        elif "profitability" in line or "margin" in line:
+            margin_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
+        elif "efficiency" in line or "roic" in line:
+            efficiency_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
+        elif "asset" in line or "health" in line:
+            asset_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
+        elif "shareholder" in line or "alignment" in line or "dilution" in line:
+            alignment_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
+
+    # Global Counter Matrix
+    color_list = [rev_growth_color, margin_color, efficiency_color, asset_color, alignment_color]
+    p4_red_count = color_list.count("🔴")
+    p4_yellow_count = color_list.count("🟡")
+    p4_green_count = color_list.count("🟢")
+    p4_green_ratio = p4_green_count / 5
+
+    # Valuation & Context Parsing from P7 and P3
     val_overvalued = contains_any(p7_output, ["overvalued", "🔴"])
     val_undervalued = contains_any(p7_output, ["undervalued", "🟢"])
     val_fairly = contains_any(p7_output, ["fairly valued", "fair value", "🟡"])
-    
-    # Scan Panel 2 & 6 for Quality Context
-    roic_green = contains_any(p4_output, ["roic", "capital efficiency"]) and "🟢" in p4_output.lower() # Fallback check
-    fcf_yield_green = "🟢" in p7_output # If valuation model shows green/undervalued margin of safety
-    
-    # Startup Specific Metric Checks (Phase 1 Breakout Verification)
-    startup_pmf_valid = ("product-market fit" in p4_lower and any(emoji in p4_lower.split("product-market fit")[1].split("\n")[0] for emoji in ["🟢", "🟡"]))
-    startup_cac_valid = ("cac payback" in p4_lower and any(emoji in p4_lower.split("cac payback")[1].split("\n")[0] for emoji in ["🟢", "🟡"]))
-    startup_low_burn = ("cash burn" in p4_lower and "🟢" in p4_lower.split("cash burn")[1].split("\n")[0])
 
     # 2. Hard Gatekeeper Assessment (Priority Rejections & Exceptions)
     calculated_status = None
@@ -453,11 +460,12 @@ if submit_button and ticker:
     # --- PHASE 1: STARTUP ROUTING ---
     if phase_num == "1":
         if p4_red_count > 0:
-            calculated_status = "❌ PASS (Not Good Enough)"
+            calculated_status = "❌ PASS (Too Risky)"
             rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
-        elif startup_pmf_valid and startup_cac_valid and startup_low_burn and dilution_green:
+        # Breakout Exception: Check if PMF, Efficiencies, and Low Burn are tracking well (No Reds, strong Alignment)
+        elif alignment_color == "🟢" and p4_green_count >= 3:
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "Exceptional Phase 1 Startup demonstrating advanced Product-Market Fit validation, high CAC efficiency, low cash burn, and tight dilution controls."
+            rule_justification = "Exceptional Phase 1 Startup demonstrating advanced Product-Market Fit validation, high capital metrics efficiency, low cash burn, and tight dilution controls."
         else:
             calculated_status = "❌ PASS (Not Good Enough)"
             rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency and early validation thresholds required to break baseline restrictions."
@@ -468,16 +476,16 @@ if submit_button and ticker:
         rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
 
     # --- GLOBAL DEALBREAKER: EXCESSIVE DILUTION ---
-    elif dilution_red:
+    elif alignment_color == "🔴":
         calculated_status = "❌ PASS (Too Risky)"
         rule_justification = "Fatal structural flaw: Severe or accelerating shareholder dilution detected, breaking core alignment parameters."
 
     # --- PHASE 4: MATURITY EVALUATION (Value Trap & Valuation Filtering) ---
     elif phase_num == "4":
-        if rev_growth_red or val_overvalued:
+        if rev_growth_color == "🔴" or val_overvalued:
             calculated_status = "❌ PASS (Not Good Enough)"
-            rule_justification = "Mature asset rejected: Identified as an overvalued profile or a stagnant value trap with flatlining 3-year revenue trends."
-        elif p4_green_ratio >= 0.60 and val_undervalued:
+            rule_justification = "Mature asset rejected: Identified as an overvalued profile or a stagnant value trap with flatlining revenue trends."
+        elif efficiency_color == "🟢" and val_undervalued:
             calculated_status = "🚀 DEEP DIVE ASAP"
             rule_justification = "Phase 4 Mature compounder showing pristine execution, strong capital return health, and an undeniable valuation margin of safety."
         elif val_fairly or (p4_green_count >= 2 and not val_overvalued):
@@ -559,12 +567,18 @@ if submit_button and ticker:
             st.error(f"Error executing Panel 8: {e}")
             p8_output = f"Final Recommendation: {calculated_status}\nReasoning: {rule_justification}"
 
-    # Save data arrays explicitly to Session State to keep them available for the PDF builder
+    # ==================================================================
+    # 🔒 FIXED CRITICAL SESSION STATE INITIALIZATION FOR PDF EXPORTER
+    # ==================================================================
     st.session_state["ticker_analyzed"] = ticker
     st.session_state["pdf_p1"] = phase_output
     st.session_state["pdf_p2"] = p2_output
     st.session_state["pdf_p3"] = p3_output
     st.session_state["pdf_p4"] = p4_output
+    st.session_state["pdf_p5"] = p5_output
+    st.session_state["pdf_p6"] = p6_output
+    st.session_state["pdf_p7"] = p7_output
+    st.session_state["pdf_p8"] = p8_output
 
 # ==================================================================
 # 📥 EXPORT & MANAGEMENT ENGINE (RETAINING OUTPUT IN RUNTIMES)
