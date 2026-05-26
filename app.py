@@ -414,83 +414,95 @@ if submit_button and ticker:
     with st.expander("💰 Business Valuation Analysis", expanded=True):
         st.markdown(p7_output)
 
+   # ==================================================================
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Nuance Refined)
     # ==================================================================
-    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Sensitivity Adjusted)
-    # ==================================================================
     
-    # 1. Linguistic Parsing & Feature Extraction via Vector Synonyms
-    has_moat_narrow_or_mod = contains_any(p2_output, ["narrow", "moderate", "⚖️", "➖"])
-    moat_narrowing = contains_any(p2_output, ["narrowing", "decreasing", "eroding", "❌"])
+    # 1. Linguistic Parsing & Feature Extraction via Emoji and Text Patterns
+    # Scan Panel 4 for specific row ratings
+    p4_lower = p4_output.lower()
+    rev_growth_red = "revenue growth" in p4_lower and "🔴" in p4_lower.split("revenue growth")[1].split("\n")[0]
+    dilution_red = "shareholder alignment" in p4_lower and "🔴" in p4_lower.split("shareholder alignment")[1].split("\n")[0]
+    dilution_green = "shareholder alignment" in p4_lower and "🟢" in p4_lower.split("shareholder alignment")[1].split("\n")[0]
     
-    growth_potential_mod_or_low = contains_any(p3_output, ["moderate", "low", "➖", "❌"])
-    growth_stable_or_decel = contains_any(p3_output, ["stable", "decelerating", "slowing", "➖", "❌"])
-    
-    metrics_poor = contains_any(p4_output, ["weak", "poor", "🔴", "0/10", "1/10", "2/10"])
-    risk_high = contains_any(p5_output, ["high risk", "high level of risk", "🔴"])
+    # Count overall traffic lights in Panel 4
+    p4_red_count = p4_output.count("🔴")
+    p4_yellow_count = p4_output.count("🟡")
+    p4_green_count = p4_output.count("🟢")
+    total_p4_metrics = p4_red_count + p4_yellow_count + p4_green_count if (p4_red_count + p4_yellow_count + p4_green_count) > 0 else 5
+    p4_green_ratio = p4_green_count / total_p4_metrics
 
-    # Baseline parsing for deep dive/watchlist qualifications
-    has_moat_valid = contains_any(p2_output, ["narrow", "wide", "moderate", "substantial", "economic moat"])
-    moat_widening = contains_any(p2_output, ["widening", "increasing", "growing moat", "✅"])
-    high_growth_potential = contains_any(p3_output, ["high", "exceptional", "strong growth potential", "✅"])
-    growth_accelerating = contains_any(p3_output, ["accelerating", "speeding up", "inflection", "✅"])
-    metrics_pass = contains_any(p4_output, ["good", "average", "strong", "moderate", "🟢", "🟡"])
-    risk_acceptable = contains_any(p5_output, ["low risk", "medium risk", "moderate risk", "🟢", "🟡"])
-    financials_acceptable = contains_any(p6_output, ["strong", "okay", "moderate", "robust", "healthy"])
-    valuation_fair_or_under = contains_any(p7_output, ["undervalued", "fairly valued", "fair value", "under-valued", "🟢", "🟡"])
+    # Scan Panel 7 for Valuation Status
+    val_overvalued = contains_any(p7_output, ["overvalued", "🔴"])
+    val_undervalued = contains_any(p7_output, ["undervalued", "🟢"])
+    val_fairly = contains_any(p7_output, ["fairly valued", "fair value", "🟡"])
+    
+    # Scan Panel 2 & 6 for Quality Context
+    roic_green = contains_any(p4_output, ["roic", "capital efficiency"]) and "🟢" in p4_output.lower() # Fallback check
+    fcf_yield_green = "🟢" in p7_output # If valuation model shows green/undervalued margin of safety
+    
+    # Startup Specific Metric Checks (Phase 1 Breakout Verification)
+    startup_pmf_valid = ("product-market fit" in p4_lower and any(emoji in p4_lower.split("product-market fit")[1].split("\n")[0] for emoji in ["🟢", "🟡"]))
+    startup_cac_valid = ("cac payback" in p4_lower and any(emoji in p4_lower.split("cac payback")[1].split("\n")[0] for emoji in ["🟢", "🟡"]))
+    startup_low_burn = ("cash burn" in p4_lower and "🟢" in p4_lower.split("cash burn")[1].split("\n")[0])
 
-    # 2. Hard Gatekeeper Assessment (Priority Rejections)
+    # 2. Hard Gatekeeper Assessment (Priority Rejections & Exceptions)
     calculated_status = None
     rule_justification = ""
 
-    # Phase Hard passes (Not Good Enough)
-    if phase_num in ["1", "5"]:
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_justification = f"Company is structurally limited by its business life cycle phase (Phase {phase_num} - Startup/Declining)."
-
-    # Too Risky Hard Pass: Poor metrics combined with High Risk
-    elif metrics_poor and risk_high:
-        calculated_status = "❌ PASS (Too Risky)"
-        rule_justification = "Fatal structural risk profile: Execution risk is high and key financial/operational metrics are tracking poorly."
-
-    # Not Good Enough Hard Pass: Weakening Moat Dynamics
-    elif has_moat_narrow_or_mod and moat_narrowing:
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_justification = "Competitive erosion detected: The company holds only a narrow or moderate economic moat that is currently narrowing."
-
-    # Not Good Enough Hard Pass: Weak or Flatlined Growth Runway
-    elif growth_potential_mod_or_low and growth_stable_or_decel:
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_justification = "Insufficient growth runway: Future growth potential is locked at moderate/low with a stable or decelerating velocity profile."
-
-    # 3. Qualification Framework Evaluation Flow (If Hard Passes are Cleared)
-    if calculated_status is None:
-        if phase_num in ["2", "3"]:
-            # Early Stage Growth Rule: Valuation is ignored completely
-            if (has_moat_valid and moat_widening and high_growth_potential and 
-                growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
-                calculated_status = "🚀 DEEP DIVE ASAP"
-                rule_justification = f"Phase {phase_num} Early Growth Play matching all structural moat expansion, growth velocity, and foundational risk criteria (Valuation filter bypassed)."
-            else:
-                calculated_status = "⏳ ADD TO WATCHLIST"
-                rule_justification = f"Phase {phase_num} Growth asset, but missing premium acceleration metrics. Tracked for pipeline timing changes."
-
-        elif phase_num == "4":
-            # Maturity Phase Rule: Fundamentals must pass AND valuation must be fair or undervalued
-            if (has_moat_valid and moat_widening and high_growth_potential and 
-                growth_accelerating and metrics_pass and risk_acceptable and financials_acceptable):
-                
-                if valuation_fair_or_under:
-                    calculated_status = "🚀 DEEP DIVE ASAP"
-                    rule_justification = "Phase 4 Mature asset meeting premium criteria with a clear valuation margin of safety (Fairly Valued / Undervalued)."
-                else:
-                    calculated_status = "⏳ ADD TO WATCHLIST"
-                    rule_justification = "Cleared quality bars, but flagged as Overvalued for a Phase 4 profile. Placed on Watchlist to await entry price."
-            else:
-                calculated_status = "❌ PASS (Not Good Enough)"
-                rule_justification = "Phase 4 mature profile failing to meet core structural framework requirements."
-        else:
+    # --- PHASE 1: STARTUP ROUTING ---
+    if phase_num == "1":
+        if p4_red_count > 0:
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
+        elif startup_pmf_valid and startup_cac_valid and startup_low_burn and dilution_green:
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "System fallback logic triggered. Placed on watchlist for manual evaluation."
+            rule_justification = "Exceptional Phase 1 Startup demonstrating advanced Product-Market Fit validation, high CAC efficiency, low cash burn, and tight dilution controls."
+        else:
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency and early validation thresholds required to break baseline restrictions."
+
+    # --- PHASE 5: DECLINING ROUTING ---
+    elif phase_num == "5":
+        calculated_status = "❌ PASS (Not Good Enough)"
+        rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
+
+    # --- GLOBAL DEALBREAKER: EXCESSIVE DILUTION ---
+    elif dilution_red:
+        calculated_status = "❌ PASS (Too Risky)"
+        rule_justification = "Fatal structural flaw: Severe or accelerating shareholder dilution detected, breaking core alignment parameters."
+
+    # --- PHASE 4: MATURITY EVALUATION (Value Trap & Valuation Filtering) ---
+    elif phase_num == "4":
+        if rev_growth_red or val_overvalued:
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_justification = "Mature asset rejected: Identified as an overvalued profile or a stagnant value trap with flatlining 3-year revenue trends."
+        elif p4_green_ratio >= 0.60 and val_undervalued:
+            calculated_status = "🚀 DEEP DIVE ASAP"
+            rule_justification = "Phase 4 Mature compounder showing pristine execution, strong capital return health, and an undeniable valuation margin of safety."
+        elif val_fairly or (p4_green_count >= 2 and not val_overvalued):
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = "High-quality mature compounding architecture. Held on watchlist to monitor entry positioning or minor metrics stabilization."
+        else:
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_justification = "Phase 4 asset fails to show the high-efficiency return metrics or margin of safety required to lock capital."
+
+    # --- PHASE 2 & 3: GROWTH STRATIFICATION ---
+    elif phase_num in ["2", "3"]:
+        if p4_red_count == 0 and p4_green_ratio >= 0.75:
+            calculated_status = "🚀 DEEP DIVE ASAP"
+            rule_justification = f"Phase {phase_num} High-Conviction Growth engine hitting pristine diagnostic bars. Flawless execution across velocity, margins, and capital metrics."
+        elif p4_red_count <= 1:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = f"Solid Phase {phase_num} Growth profile showing robust primary velocity. Minor scaling friction or near-term margins warrant pipeline observation."
+        else:
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_justification = f"Phase {phase_num} Growth asset disqualified due to excessive operating friction, capital inefficiencies, or multi-metric red flags."
+
+    # --- FALLBACK PROTECTION ---
+    else:
+        calculated_status = "⏳ ADD TO WATCHLIST"
+        rule_justification = "System fallback logic triggered. Deflected to pipeline queue for structural manual verification."
 
     # 4. Chief Investment Officer Panel Generation
     with st.expander("⚖️ Panel #8: Final Investment Decision", expanded=True):
@@ -514,16 +526,12 @@ if submit_button and ticker:
            - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear.
 
         2. If the status is "⏳ ADD TO WATCHLIST":
-           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now (e.g., waiting on valuation adjustments for mature plays, or scale/velocity attributes for earlier phase compounders).
+           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. If a Phase 1 startup, discuss how its remarkable lack of burn and verified early PMF separates it from typical startup traps but requires scale confirmation. If mature/growth, discuss minor metrics or valuation adjustments needed.
            - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
 
-        3. If the status is "❌ PASS (Too Risky)":
-           - **Core Investment Thesis:** Clearly diagnose that this asset failed the safety audit. Focus heavily on why the combination of toxic risk exposure and bleeding core metrics creates a permanent destruction of capital risk, completely invalidating any potential growth narrative.
+        3. If the status contains "❌ PASS":
+           - **Core Investment Thesis:** Clearly diagnose that this asset failed the structural selection framework. Focus heavily on why the combination of life cycle constraints, toxic metrics (like dilution/value traps), or poor efficiency creates a permanent destruction of capital risk.
            - **Key Risks to Identify:** Outline the specific systemic risk factors, balance sheet or execution vulnerabilities that make this target completely uninvestable.
-
-        4. If the status is "❌ PASS (Not Good Enough)":
-           - **Core Investment Thesis:** Focus entirely on structural mediocrity. Explain that while the asset might not go bankrupt tomorrow, it represents a dead-capital trap due to stagnant revenue lines, a narrowing or weak economic moat, or decay in underlying industry lifecycles.
-           - **Key Risks to Identify:** Highlight the risk of opportunity cost—tying up equity capital in low-velocity, deteriorating business profiles with zero macro tailwinds.
 
         Output ONLY the markdown format below. Ensure the layout matches perfectly. Use the specific HTML structure provided below for the Final Recommendation to make it pop out with massive text and clear separation.
 
@@ -557,10 +565,6 @@ if submit_button and ticker:
     st.session_state["pdf_p2"] = p2_output
     st.session_state["pdf_p3"] = p3_output
     st.session_state["pdf_p4"] = p4_output
-    st.session_state["pdf_p5"] = p5_output
-    st.session_state["pdf_p6"] = p6_output
-    st.session_state["pdf_p7"] = p7_output
-    st.session_state["pdf_p8"] = p8_output
 
 # ==================================================================
 # 📥 EXPORT & MANAGEMENT ENGINE (RETAINING OUTPUT IN RUNTIMES)
