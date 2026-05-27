@@ -490,24 +490,35 @@ if "active_ticker" in st.session_state:
     calculated_status = None
     rule_justification = ""
 
-    if phase_num == "1":
-        if p4_red_count > 0 and not hyper_growth_pass:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
-        elif hyper_growth_pass or (alignment_color == "🟢" and p4_green_count >= 3):
-            calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "Explosive Phase 1 profile detected. Shareholder dilution is balanced by structural hyper-growth velocity (>100% YoY), warranting close monitoring."
-        else:
-            calculated_status = "❌ PASS (Not Good Enough)"
-            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency thresholds."
-
-    elif phase_num == "5":
+    # ==================================================================
+    # 🚀 ISOLATED CORRECTED EVALUATION TREE (LEAVES ALL OTHER CODE UNTOUCHED)
+    # ==================================================================
+    if phase_num == "5":
         calculated_status = "❌ PASS (Not Good Enough)"
         rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
+
+    elif phase_num in ["2", "3"] and hyper_growth_pass:
+        calculated_status = "🚀 DEEP DIVE ASAP"
+        rule_justification = f"Phase {phase_num} Hyper-Conviction Growth Engine. Dilution override activated due to verified explosive (>100%) revenue velocity scaling."
+
+    elif phase_num == "1" and hyper_growth_pass:
+        calculated_status = "⏳ ADD TO WATCHLIST"
+        rule_justification = "Explosive Phase 1 profile detected. Shareholder dilution is balanced by structural hyper-growth velocity (>100% YoY), warranting close monitoring."
 
     elif alignment_color == "🔴":
         calculated_status = "❌ PASS (Too Risky)"
         rule_justification = "Fatal structural flaw: Severe or accelerating shareholder dilution detected without sufficient topline growth velocity to compensate."
+
+    elif phase_num == "1":
+        if p4_red_count > 0:
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
+        elif alignment_color == "🟢" and p4_green_count >= 3:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = "High-quality Phase 1 startup profile meeting strict baseline structural indicators."
+        else:
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency thresholds."
 
     elif phase_num == "4":
         if rev_growth_color == "🔴" or val_overvalued:
@@ -518,16 +529,13 @@ if "active_ticker" in st.session_state:
             rule_justification = "Phase 4 Mature compounder showing pristine execution, strong capital return health, and an undeniable valuation margin of safety."
         elif val_fairly or (p4_green_count >= 2 and not val_overvalued):
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "High-quality mature compounding architecture. Held on watchlist to monitor entry positioning or minor metrics stabilization."
+            rule_justification = "High-quality mature compounding architecture. Held on watchlist to monitor entry positioning or minor metrics stabilisation."
         else:
             calculated_status = "❌ PASS (Not Good Enough)"
             rule_justification = "Phase 4 asset fails to show the high-efficiency return metrics or margin of safety required to lock capital."
 
     elif phase_num in ["2", "3"]:
-        if hyper_growth_pass:
-            calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_justification = f"Phase {phase_num} Hyper-Conviction Growth Engine. Dilution override activated due to verified explosive (>100%) revenue velocity scaling."
-        elif p4_red_count == 0 and p4_green_ratio >= 0.75:
+        if p4_red_count == 0 and p4_green_ratio >= 0.75:
             calculated_status = "🚀 DEEP DIVE ASAP"
             rule_justification = f"Phase {phase_num} High-Conviction Growth engine hitting pristine diagnostic bars. Flawless execution across velocity, margins, and capital metrics."
         elif p4_red_count <= 1:
