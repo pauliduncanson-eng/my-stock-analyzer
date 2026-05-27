@@ -645,7 +645,8 @@ if "ticker_analyzed" in st.session_state:
         
         symbol_mappings = {
             "🟩": "Green", "🟨": "Yellow", "🟥": "Red", "🟢": "Good", "🟡": "Average", "🔴": "Weak",
-            "✅": "PASS", "❌": "FAIL", "⚡": "", "⏳": "", "🚀": ""
+            "✅": "PASS", "❌": "FAIL", "⚡": "", "⏳": "", "🚀": "", "🗂️": "", "🧠": "", 
+            "📊": "", "🎛️": "", "📈": "", "📉": "", "💎": "", "🛡️": "", "🎯": "", "📋": ""
         }
         for symbol, text_replacement in symbol_mappings.items():
             text = text.replace(symbol, text_replacement)
