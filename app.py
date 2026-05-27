@@ -415,7 +415,7 @@ if submit_button and ticker:
         st.markdown(p7_output)
 
     # ==================================================================
-    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Robust Realignment)
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Explosive Growth Refinement)
     # ==================================================================
     
     # 1. Clean Metric Array Parsing (Splitting by lines to guarantee position matches)
@@ -441,7 +441,18 @@ if submit_button and ticker:
         elif "shareholder" in line or "alignment" in line or "dilution" in line:
             alignment_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
 
-    # Global Counter Matrix
+    # 🌟 NEW: EXPLOSIVE HYPER-GROWTH DETECTOR (The Nebius Exception Rule)
+    # Checks if the upstream panels indicate triple-digit or explosive growth text markers
+    explosive_growth_detected = contains_any(p4_output + p3_output, ["100%", "triple-digit", "explosive", "doubled"])
+
+    # If explosive growth is present, we accept dilution as a necessary tool for capital scaling
+    if explosive_growth_detected and alignment_color == "🔴":
+        alignment_color = "🟡"  # Soften the fatal flaw status to a warning
+        hyper_growth_pass = True
+    else:
+        hyper_growth_pass = False
+
+    # Global Counter Matrix (Recalculated with the potential exception rule applied)
     color_list = [rev_growth_color, margin_color, efficiency_color, asset_color, alignment_color]
     p4_red_count = color_list.count("🔴")
     p4_yellow_count = color_list.count("🟡")
@@ -459,26 +470,25 @@ if submit_button and ticker:
 
     # --- PHASE 1: STARTUP ROUTING ---
     if phase_num == "1":
-        if p4_red_count > 0:
+        if p4_red_count > 0 and not hyper_growth_pass:
             calculated_status = "❌ PASS (Too Risky)"
             rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
-        # Breakout Exception: Check if PMF, Efficiencies, and Low Burn are tracking well (No Reds, strong Alignment)
-        elif alignment_color == "🟢" and p4_green_count >= 3:
+        elif hyper_growth_pass or (alignment_color == "🟢" and p4_green_count >= 3):
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "Exceptional Phase 1 Startup demonstrating advanced Product-Market Fit validation, high capital metrics efficiency, low cash burn, and tight dilution controls."
+            rule_justification = "Explosive Phase 1 profile detected. Shareholder dilution is balanced by structural hyper-growth velocity (>100% YoY), warranting close monitoring."
         else:
             calculated_status = "❌ PASS (Not Good Enough)"
-            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency and early validation thresholds required to break baseline restrictions."
+            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency thresholds."
 
     # --- PHASE 5: DECLINING ROUTING ---
     elif phase_num == "5":
         calculated_status = "❌ PASS (Not Good Enough)"
         rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
 
-    # --- GLOBAL DEALBREAKER: EXCESSIVE DILUTION ---
+    # --- GLOBAL DEALBREAKER: EXCESSIVE DILUTION (With Hyper-Growth Immunity Bypass) ---
     elif alignment_color == "🔴":
         calculated_status = "❌ PASS (Too Risky)"
-        rule_justification = "Fatal structural flaw: Severe or accelerating shareholder dilution detected, breaking core alignment parameters."
+        rule_justification = "Fatal structural flaw: Severe or accelerating shareholder dilution detected without sufficient topline growth velocity to compensate."
 
     # --- PHASE 4: MATURITY EVALUATION (Value Trap & Valuation Filtering) ---
     elif phase_num == "4":
@@ -497,7 +507,10 @@ if submit_button and ticker:
 
     # --- PHASE 2 & 3: GROWTH STRATIFICATION ---
     elif phase_num in ["2", "3"]:
-        if p4_red_count == 0 and p4_green_ratio >= 0.75:
+        if hyper_growth_pass:
+            calculated_status = "🚀 DEEP DIVE ASAP"
+            rule_justification = f"Phase {phase_num} Hyper-Conviction Growth Engine. Dilution override activated due to verified explosive (>100%) revenue velocity scaling."
+        elif p4_red_count == 0 and p4_green_ratio >= 0.75:
             calculated_status = "🚀 DEEP DIVE ASAP"
             rule_justification = f"Phase {phase_num} High-Conviction Growth engine hitting pristine diagnostic bars. Flawless execution across velocity, margins, and capital metrics."
         elif p4_red_count <= 1:
@@ -530,15 +543,15 @@ if submit_button and ticker:
         Depending on the MANDATORY DESIGNATION provided above, adapt your breakdown inside the sections below using these parameters:
 
         1. If the status is "🚀 DEEP DIVE ASAP":
-           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity (the microeconomic moats, lifecycle expansion momentum, and core drivers). If Phase 2/3, highlight why valuation is ignored in favor of growth velocity. If Phase 4, explicitly highlight the valuation discipline.
-           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear.
+           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity. If an override for explosive growth (e.g. Nebius style) occurred, explicitly frame the dilution as a positive, strategic capital deployment mechanism required to fund a generational land grab. Highlight why topline hyper-velocity trumps standard capital dilution guidelines.
+           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear (e.g., infrastructure execution risk, capacity utilization delays).
 
         2. If the status is "⏳ ADD TO WATCHLIST":
-           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. If a Phase 1 startup, discuss how its remarkable lack of burn and verified early PMF separates it from typical startup traps but requires scale confirmation. If mature/growth, discuss minor metrics or valuation adjustments needed.
+           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. Focus on scale confirmation, validation of unit economics, or near-term margins adjustments.
            - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
 
         3. If the status contains "❌ PASS":
-           - **Core Investment Thesis:** Clearly diagnose that this asset failed the structural selection framework. Focus heavily on why the combination of life cycle constraints, toxic metrics (like dilution/value traps), or poor efficiency creates a permanent destruction of capital risk.
+           - **Core Investment Thesis:** Clearly diagnose that this asset failed the structural selection framework. Focus heavily on why the combination of life cycle constraints, toxic metrics (like dilution without growth), or poor efficiency creates a permanent destruction of capital risk.
            - **Key Risks to Identify:** Outline the specific systemic risk factors, balance sheet or execution vulnerabilities that make this target completely uninvestable.
 
         Output ONLY the markdown format below. Ensure the layout matches perfectly. Use the specific HTML structure provided below for the Final Recommendation to make it pop out with massive text and clear separation.
