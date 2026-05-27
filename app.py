@@ -158,7 +158,7 @@ def contains_any(text, keywords):
 with st.form(key="research_panel_form"):
     ticker = st.text_input(
         "Add ticker to run stock analysis:", 
-        placeholder="e.g., Robot S.A. (EPA:ALROB)"
+        placeholder="e.g., Nebius Group NV (NBIS)"
     )
     
     st.markdown(
