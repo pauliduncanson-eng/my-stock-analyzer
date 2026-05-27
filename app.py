@@ -337,12 +337,19 @@ if submit_button and ticker:
             st.markdown(p6_output)
 
     # ==================================================================
-    # 📈 BATCH 3: Dynamic Metrics & Valuation Layer
+    # 📈 BATCH 3: Dynamic Metrics & Valuation Layer (With TSR Matrix)
     # ==================================================================
     p4_output = ""
     p7_output = ""
+    p7_5_output = "" # 💻 Initialized to prevent NameErrors!
+    
     with st.spinner(f"🔢 Running valuation math specifically targeted to Phase {phase_num}..."):
         metrics_valuation_prompt = f"""
+        🚨 DATA SOURCE PROVENANCE ENFORCEMENT FILTER 🚨
+        - Your primary search queries MUST prioritize official financial nodes: "Company Investor Relations", "SEC EDGAR 10-K/10-Q", "Annual Report PDF", "Regulatory Filings", and "Earnings Call Transcript".
+        - For forward-looking indicators, revenue outlooks, or capacity targets, use EXCLUSIVELY official corporate guidance issued directly by management in official press releases or IR portals.
+        - STRICTLY FORBIDDEN: Do not ingest data, commentary, target figures, or assertions from third-party blogs, YouTube analysis videos, Substack opinion pieces, or retail forum channels (e.g., Reddit, Stocktwits). If official management guidance is unavailable for a metric, flag it as [Management Guidance Not Disclosed] instead of substituting speculative third-party targets.
+
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for target: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
         Step 1: Use your Google Search tool to find today's current date and year (2026).
         Step 2: Source recent filings (10-Q/10-K or international IR Annual Reports/investor presentations if non-US). Gather current share price, diluted share count, cash, debt, and consensus NTM (next-twelve-month) metrics. Calculate EV = Market Cap + Debt - Cash. Ensure currency consistency (e.g. convert to Euros if analyzing European operations).
@@ -355,12 +362,6 @@ if submit_button and ticker:
         - **Phase 3 (Solid Growth):** Primary: P/Sales. Secondary: EV/EBITDA (NTM).
         - **Phase 4 (Maturity):** Primary: Discounted Cash Flow (DCF) (5-10yr explicit + perpetuity). Secondary: FWD P/E. Must state clearly if it is 'Undervalued', 'Fairly Valued', or 'Overvalued'.
         - **Phase 5 (Declining):** Primary: Sum-of-the-Parts (SOTP) / Net Asset Value (NAV). Secondary: Reverse DCF / Liquidation Value / Dividend Yield vs Risk-Free Rate.
-
-        ### INDUSTRY / ASSAY-SPECIFIC OVERRIDES
-        - **Biotech / Life Sciences:** Probability-adjusted NPV (pNPV) of clinical pipeline using success probabilities. EV/Peak Sales. Green if Market Cap <= 0.7x pNPV; Yellow 0.7-1.3x; Red >= 1.3x.
-        - **SaaS / Software:** Apply Rule of 40 (Growth % + FCF %). Evaluate EV/Gross Profit, FWD P/S, and Net Dollar Retention.
-        - **Energy / Mining:** Net Asset Value (NAV/NPV) of reserves, SOTP by asset tier, EV/Reserves.
-        - **Bitcoin / Crypto Treasury Companies:** Determine current market Net Asset Value (mNAV) and benchmark to peers.
 
         ### BENCHMARK COLOR RULES
         - 🟩 Green (Undervalued / Strong): Multiple <= peer 25th percentile OR <= company's own 3-year low.
@@ -389,32 +390,50 @@ if submit_button and ticker:
         - **Phase:** {phase_num}
         - **Summary Valuation Rating:** [MANDATORY EVALUATION: State strictly as either **Undervalued 🟢**, **Fairly Valued 🟡**, or **Overvalued 🔴** based on the percentile comparison rules above]
         - **Target Phase Framework applied:** Valuation Method for Phase {phase_num} (plus any applicable Industry Override)
-        - **Calculated Multiple / Model output:** [Provide exact multiple or valuation range, e.g., EV/Sales, Forward P/E, Reverse DCF intrinsic range, or pNPV calculations]
-        - **Benchmark Sector Context:** [Provide explicit text evaluating current multiples relative to sector medians, peer distributions (25th/75th percentiles), and the company's 3-yr baseline to validate the summary rating]
-        - **Key Drivers:** [List core components such as growth, margins, or risk trends moving this valuation]
-        - **Sensitivity:** [Key assumptions that shift this valuation stance]
+        - **Calculated Multiple / Model output:** [Provide exact multiple or valuation range]
+        - **Benchmark Sector Context:** [Provide explicit text evaluating current multiples relative to sector medians]
+        - **Key Drivers:** [List core components]
+        - **Sensitivity:** [Key assumptions]
 
         ## 📎 Sources
         [1] Source Name (Filing/IR Report)
         [2] Source Name (Market Data/Consensus/Peer Medians)
         === PANEL_7_END ===
-        
+
+        ---
+
+        === PANEL_7_5_START ===
+        ### 📊 Total Shareholder Return (TSR) Driver Matrix
+        *Evaluating fundamental drivers of structural asset appreciation based strictly on primary corporate disclosure.*
+
+        | TSR Driver | Current Profile Status | Core Phase Lifecycle Mechanics |
+        | :--- | :--- | :--- |
+        | **🚀 Revenue Growth** | [Status: e.g., 🔥 Primary Engine / 🟡 Moderate / ❌ Stagnant] | [Detail how top-line velocity is moving the absolute terminal valuation] |
+        | **📈 Margin Expansion** | [Status: e.g., 🟢 Active / ⏳ Latent Potential / 🔴 Contracting] | [Detail operating leverage trends, gross margin health, or infrastructure scaling costs] |
+        | **🔄 Multiple Expansion** | [Status: e.g., 🟩 Undervalued Entry / ⚖️ Fairly Valued / 🟥 Premium Multiple] | [Assess if price returns will outpace or compress the asset's current valuation multiple] |
+        | **📉 Share Reduction** | [Status: e.g., 🟢 Aggressive Buybacks / ➖ Neutral / ❌ Dilutive Capital Raise] | [Identify if share float reduction is boosting EPS, or if dilution is actively funding growth] |
+        === PANEL_7_5_END ===
         """
         try:
             macro_val_output = generate_analysis_layer(ticker, metrics_valuation_prompt)
             p4_output = parse_panel(macro_val_output, "=== PANEL_4_START ===", "=== PANEL_4_END ===", "### 📊 Phase")
             p7_output = parse_panel(macro_val_output, "=== PANEL_7_START ===", "=== PANEL_7_END ===", "### 💰 Phase-Appropriate")
+            p7_5_output = parse_panel(macro_val_output, "=== PANEL_7_5_START ===", "=== PANEL_7_5_END ===", "### 📊 Total Shareholder Return")
         except Exception as e:
             st.error(f"Error executing valuation modules: {e}")
             p4_output = "⚠️ Valuation metrics framework execution error."
             p7_output = "⚠️ Valuation calculation framework execution error."
+            p7_5_output = "⚠️ TSR Matrix compilation unavailable."
 
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
         st.markdown(p4_output)
 
     with st.expander("💰 Business Valuation Analysis", expanded=True):
         st.markdown(p7_output)
-
+        
+    with st.expander("📊 Total Shareholder Return (TSR) Driver Card", expanded=True):
+        st.markdown(p7_5_output)
+        
     # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (Explosive Growth Refinement)
     # ==================================================================
