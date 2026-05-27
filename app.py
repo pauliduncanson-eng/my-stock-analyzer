@@ -140,7 +140,7 @@ def contains_any(text, keywords):
 # 🗂️ MAIN HOMEPAGE SELECTION PANEL (CORRECT INDENTATION)
 # ==================================================================
 with st.form(key="research_panel_form"):
-    st.header("🎛️ Lets Go..")
+    st.header("Lets Go...")
     ticker_input = st.text_input("Add ticker to run stock analysis:", placeholder="e.g., Nebius Group NV (NBIS)")
     st.markdown("Enter both the company name and the ticker symbol to ensure perfect data collection according to Google Finance (e.g., *Rolls-Royce Holdings PLC LON:RR or 2Crsi SA EPA:AL2SI*).")
     submit_button = st.form_submit_button(label="🚀 Run Analysis")
