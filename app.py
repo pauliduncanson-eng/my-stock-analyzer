@@ -9,7 +9,7 @@ from fpdf import FPDF
 # 1. Page Configuration & Styling
 st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
 st.title("📊 European Hidden Gems Research Dashboard")
-st.subheader("30-Second Analysis: Instantly determine if this business is a Pass, Watchlist, or Deep Dive Asap.")
+st.subheader("30-Second Analysis: Instantly determine if this business is a Pass, Add ot Watchlist, or Deep Dive Asap.")
 st.caption("version 1.2")
 
 # ==================================================================
