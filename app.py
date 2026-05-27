@@ -164,7 +164,7 @@ with st.form(key="research_panel_form"):
     st.markdown(
         "Enter both the company name and the ticker symbol and provide a suitable example. "
         "To ensure perfect data collection provide the full company name and the ticker symbol "
-        "according to Google Finance (e.g., *Rolls-Royce Holdings PLC LON:RR* or * 2Crsi SA EPA:AL2SI*)."
+        "according to Google Finance (e.g., *Rolls-Royce Holdings PLC LON:RR* or 2Crsi SA EPA:AL2SI*)."
     )
     
     submit_button = st.form_submit_button(label="🚀 Run Analysis")
