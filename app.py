@@ -245,6 +245,8 @@ if submit_button and ticker:
         **Assessment:** [Present ✅ / Not Present ❌]
         ## 🏆 INTANGIBLE ASSETS
         **Assessment:** [Present ✅ / Not Present ❌]
+        ## 📎 Primary Sources Used
+        - [Identify specific official filing, proxy statement, or IR presentation used]
         === PANEL_2_END ===
 
         ---
@@ -265,6 +267,8 @@ if submit_button and ticker:
         **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
         ## ⚖️ Regulatory Tailwinds
         **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        ## 📎 Primary Sources Used
+        - [Identify specific official filing, proxy statement, or IR presentation used]
         === PANEL_3_END ===
 
         ---
@@ -285,6 +289,8 @@ if submit_button and ticker:
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
         ### 👥 Competition
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
+        ## 📎 Primary Sources Used
+        - [Identify specific official filing, proxy statement, or IR presentation used]
         === PANEL_5_END ===
 
         ---
@@ -308,6 +314,8 @@ if submit_button and ticker:
         ### 💸 Cash Flows
         - **Free Cash Flow:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
         - **Operating Cash Flow:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+        ## 📎 Primary Sources Used
+        - [Identify specific official filing, proxy statement, or IR presentation used]
         === PANEL_6_END ===
         """
         try:
