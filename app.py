@@ -220,9 +220,10 @@ if submit_button and ticker:
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
         macro_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine. Perform a comprehensive analysis on target stock identifier/company name: '{ticker}'.
-        Step 1: Use your Google Search tool to find today's current date/year (2026).
-        Step 2: Source recent regulatory filings (SEC EDGAR, European company registries, or investor relations centers) and earnings call transcripts.
-        Step 3: Generate the full analysis using the exact demarcated templates below. Separate components with the clear marker '---'. Do not include any conversational intro or outro.
+        Step 1: Use your Google Search tool to identify today's current date and year (2026).
+        Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for target '{ticker}'.
+        Step 3: Analyze the company's trajectory, revenue patterns, and product maturity. Classify it strictly into one of the following 5 phases: 1. Startup, 2. Rapid Growth, 3. Solid Growth, 4. Maturity, 5. Declining.
+        Step 4: Output your final findings using the template format below. Do not add any conversational preambles. Output ONLY the completed template. It is vital you include the exact phrase 'Phase X' (where X is 1-5) in your 'Identified Phase' field.
 
         === PANEL_2_START ===
         # 🏰 MOAT ANALYSIS: [Company Name] ({ticker})
