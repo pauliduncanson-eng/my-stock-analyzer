@@ -606,17 +606,17 @@ if submit_button and ticker:
     # ==================================================================
     with st.expander("📌 Verified Data Provenance & Primary Sources", expanded=False):
         st.markdown("""
-        ### 🛡️ Institutional Guardrail Verification
-        *This analysis filter has systematically bypassed third-party retail forums, speculation blogs, and unverified video media. The core data points utilized above were cross-referenced and extracted from the following primary disclosure channels:*
+        ### 📌 Where Does This Data Come From?
+        **Our Promise: No Hype. No Rumors. No Echo Chambers.**
+        
+        To protect your capital, this dashboard systematically filters out speculative YouTube videos, Reddit threads, and unverified finance blogs. Instead, the AI analyst acts like a professional researcher, pulling and cross-referencing numbers directly from the most authoritative corporate sources:
+        
+        * 📄 **Official Regulatory Filings:** Direct access to public company repositories (like the **SEC EDGAR** database for US stocks or official regional business registries for European listings).
+        * 🏢 **Investor Relations Portals:** Hard data sourced directly from official corporate press rooms and investor hubs.
+        * 🎙️ **Earnings Frameworks:** Direct numbers extracted from audited quarterly reports, official management earnings transcripts, and slide decks.
         """)
         
-        st.markdown(f"""
-        * **Official Regulatory Filings:** [SEC EDGAR Repository (10-K / 10-Q)] (https://www.sec.gov/edgar/searchedgar/companysearch) or regional international registries.
-        * **Corporate Disclosures:** Official Company Investor Relations (IR) Portal / Press Room.
-        * **Earnings Framework:** Management Earnings Call Transcripts & Shareholder Presentations.
-        """)
-        
-        st.caption("🔒 Source Audit Trail: Active | Mode: Strict Investor Relations Filtering Only")
+        st.caption("🔒 Data Quality Assurance: Active — Zero third-party retail speculation allowed.")
 
     # ==================================================================
     # 🔒 FIXED CRITICAL SESSION STATE INITIALIZATION FOR PDF EXPORTER
