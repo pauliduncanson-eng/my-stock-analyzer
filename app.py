@@ -20,7 +20,7 @@ if "password_correct" not in st.session_state:
 
 if not st.session_state.password_correct:
     st.write("### 🔒 Security Access Required")
-    st.write("This proprietary dashboard is reserved for community members.")
+    st.write("This proprietary dashboard is reserved for premium members.")
     with st.form("password_gate_form", clear_on_submit=False):
         user_password = st.text_input("Enter your access password:", type="password")
         submit_pass = st.form_submit_button("Unlock Dashboard", use_container_width=True)
@@ -600,13 +600,13 @@ if "active_ticker" in st.session_state:
     with st.expander("📌 Verified Data Provenance & Legal Disclaimer", expanded=False):
         st.markdown("""
         ### 📌 Where Does This Data Come From?
-        **Our Promise: No Hype. No Rumors. No Echo Chambers.**
+        **My Promise: No Fake Data.**
         
-        To protect your capital, this dashboard systematically filters out speculative YouTube videos, Reddit threads, and unverified finance blogs. Instead, the AI analyst acts like a professional researcher, pulling and cross-referencing numbers directly from the most authoritative corporate sources:
+        I have written this program to filter out speculative data from unverified sources such as YouTube videos, Reddit threads, and 3rd party sources. Instead, the AI analyst acts like a professional researcher, pulling and cross-referencing numbers directly from the most authoritative corporate sources:
         
-        * 📄 **Official Regulatory Filings:** Direct access to public company repositories (like the **SEC EDGAR** database for US stocks or official regional business registries for European listings).
-        * 🏢 **Investor Relations Portals:** Hard data sourced directly from official corporate press rooms and investor hubs.
-        * 🎙️ **Earnings Frameworks:** Direct numbers extracted from audited quarterly reports, official management earnings transcripts, and slide decks.
+        * 📄 **Official SEC Filings:** Direct access to public company repositories (like the **SEC EDGAR** database for US stocks or official regional business registries for European listings).
+        * 🏢 **Investor Relations Portals:** Hard data sourced directly from official corporate press releases and IR pages.
+        * 🎙️ **Earnings Releases:** Direct numbers extracted from audited quarterly reports, official management earnings transcripts, and slide decks.
         
         ---
         
