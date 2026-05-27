@@ -236,17 +236,27 @@ if submit_button and ticker:
         **Summary:** [Provide a 1-2 sentence summary of the Moat thesis, supported by a key metric citation.]
 
         ## 👥 NETWORK EFFECT
-        **Assessment:** [Present ✅ / Not Present ❌]
+        - **Assessment:** [Present ✅ / Not Present ❌]
+        - **Why (With Data Evidence):** [Provide a single sentence explaining how user additions scale value, explicitly citing a specific corporate data point or metric if present, e.g., active user counts or platform volume growth.]
+
         ## ⚓ SWITCHING COSTS
-        **Assessment:** [Present ✅ / Not Present ❌]
+        - **Assessment:** [Present ✅ / Not Present ❌]
+        - **Why (With Data Evidence):** [Provide a single sentence explaining the friction preventing customer churn, explicitly citing a specific operational metric if present, e.g., a % renewal rate, dollar-based net retention (DBNR), or average contract length.]
+
         ## 🏭 LOW-COST PRODUCTION
-        **Assessment:** [Present ✅ / Not Present ❌]
+        - **Assessment:** [Present ✅ / Not Present ❌]
+        - **Why (With Data Evidence):** [Provide a single sentence explaining structural cost advantages, explicitly citing a specific financial metric if present, e.g., gross margin percentage advantage over peers or shipping cost per unit.]
+
         ## 🚀 COUNTER POSITIONING
-        **Assessment:** [Present ✅ / Not Present ❌]
+        - **Assessment:** [Present ✅ / Not Present ❌]
+        - **Why (With Data Evidence):** [Provide a single sentence explaining why legacy incumbents cannot copy this business model, explicitly citing a specific operational data point, e.g., customer acquisition cost (CAC) efficiency differences or pricing model structures.]
+
         ## 🏆 INTANGIBLE ASSETS
-        **Assessment:** [Present ✅ / Not Present ❌]
-        ## 📎 Primary Sources Used
-        - [Identify specific official filing, proxy statement, or IR presentation used]
+        - **Assessment:** [Present ✅ / Not Present ❌]
+        - **Why (With Data Evidence):** [Provide a single sentence tracking brand equity or regulatory protection, explicitly citing a specific hard data point, e.g., exact patent counts, regulatory approval numbers, or a premium pricing margin percentage.]
+
+        ## 📎 Sources
+        - [Identify specific official filing, proxy statement, or IR presentation used for Moat verification]
         === PANEL_2_END ===
 
         ---
@@ -260,15 +270,23 @@ if submit_button and ticker:
         **Evidence Summary:** [1–2 sentence narrative supported by a defining corporate growth metric citation.] 
 
         ## 🌍 Market Expansion
-        **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Why (With Data Evidence):** [Provide a single sentence explaining TAM expansion or geographic entries, explicitly citing a specific growth data point, e.g., number of new country store openings, international segment growth rate %, or localized customer acquisition statistics.]
+
         ## 🧪 Product Innovation
-        **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Why (With Data Evidence):** [Provide a single sentence identifying new product rollouts, explicitly citing a specific metric, e.g., percentage of current revenue derived from products launched in the last 24 months, pipeline asset numbers, or R&D spending trajectory.]
+
         ## 🤖 Technology Adoption
-        **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Why (With Data Evidence):** [Provide a single sentence on platform infrastructure optimization, explicitly citing a specific data point, e.g., cloud cost efficiencies, automated fulfillment rates, or cross-selling conversion percentages.]
+
         ## ⚖️ Regulatory Tailwinds
-        **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
-        ## 📎 Primary Sources Used
-        - [Identify specific official filing, proxy statement, or IR presentation used]
+        - **Assessment:** Strength: [🟢/🟡/🔴/⚫] | Direction: [✅/➖/❌]
+        - **Why (With Data Evidence):** [Provide a single sentence on legal frameworks or subsidies driving demand, explicitly citing a specific regulatory data point or timeline milestone if available.]
+
+        ## 📎 Sources 
+        - [Identify specific official management guidance statement, earnings release, or investor deck used]
         === PANEL_3_END ===
 
         ---
@@ -283,14 +301,22 @@ if submit_button and ticker:
         ## 🎯 RISK ASSESSMENT DETAILS
         ### 🥚🧺 Concentration
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
+        - **Why (With Data Evidence):** [Provide a single sentence justifying the rating, explicitly citing a hard metric from recent disclosures, e.g., customer concentration percentages, single-supplier reliance ratios, or geographic segment revenue exposure %.]
+
         ### 🥷 Disruption
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
+        - **Why (With Data Evidence):** [Provide a single sentence on technological obsolescence or substitute risks, explicitly citing an operational or industry metric, e.g., R&D spending compared to peers or legacy product revenue exposure.]
+
         ### 🕵️ Outside Forces
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
+        - **Why (With Data Evidence):** [Provide a single sentence tracking macroeconomic, currency, or regulatory headwinds, explicitly citing a defining corporate data point, e.g., foreign exchange impact percentages or debt exposure to floating interest rates.]
+
         ### 👥 Competition
         - **Rating:** [🔴/🟡/🟢] | **Trend:** [⬆️/➖/⬇️]
-        ## 📎 Primary Sources Used
-        - [Identify specific official filing, proxy statement, or IR presentation used]
+        - **Why (With Data Evidence):** [Provide a single sentence analysing market share or pricing pressure, explicitly citing a hard data point, e.g., relative market share %, peer margin comparisons, or historical customer acquisition cost trends.]
+
+        ## 📎 Sources
+        - [Identify specific Item 1A Risk Factors or relevant notes from the primary official filing used]
         === PANEL_5_END ===
 
         ---
@@ -303,19 +329,28 @@ if submit_button and ticker:
         ## 🔍 Detailed Analysis 
         ### 📋 Income Statement
         - **Revenue Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing the exact current revenue figure and YoY percentage change from the latest filing.]
         - **Gross Profit Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing the exact gross margin % or absolute profit change.]
         - **Operating Income Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing the operating income (EBIT) or operating margin metric.]
         - **EPS Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing the exact diluted EPS value.]
 
         ### 🏦 Balance Sheet
         - **Cash & Securities:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing the exact cash and short-term investments balance.]
         - **Debt Levels:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing total debt levels, net cash position, or leverage ratio like Debt/EBITDA.]
 
         ### 💸 Cash Flows
         - **Free Cash Flow:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
+          * **Evidence (With Data):** [Provide a brief sentence citing the absolute FCF generated or FCF margin %.]
         - **Operating Cash Flow:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-        ## 📎 Primary Sources Used
-        - [Identify specific official filing, proxy statement, or IR presentation used]
+          * **Evidence (With Data):** [Provide a brief sentence citing the operating cash flow cash generation metric.]
+
+        ## 📎 Sources
+        - [Identify specific Consolidated Financial Statements, Balance Sheet, or Cash Flow footnotes from the primary official filing used]
         === PANEL_6_END ===
         """
         try:
