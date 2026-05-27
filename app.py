@@ -310,25 +310,25 @@ if "active_ticker" in st.session_state:
         ## 🔍 Detailed Analysis 
         ### 📋 Income Statement
         - **Revenue Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the exact current revenue figure and YoY percentage change from the latest filing.]
+          * **Evidence:** [Provide a brief sentence citing the exact current revenue figure and YoY percentage change from the latest filing.]
         - **Gross Profit Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the exact gross margin % or absolute profit change.]
+          * **Evidence:** [Provide a brief sentence citing the exact gross margin % or absolute profit change.]
         - **Operating Income Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the operating income (EBIT) or operating margin metric.]
+          * **Evidence:** [Provide a brief sentence citing the operating income (EBIT) or operating margin metric.]
         - **EPS Trend:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the exact diluted EPS value.]
+          * **Evidence:** [Provide a brief sentence citing the exact diluted EPS value.]
 
         ### 🏦 Balance Sheet
         - **Cash & Securities:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the exact cash and short-term investments balance.]
+          * **Evidence:** [Provide a brief sentence citing the exact cash and short-term investments balance.]
         - **Debt Levels:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing total debt levels, net cash position, or leverage ratio like Debt/EBITDA.]
+          * **Evidence:** [Provide a brief sentence citing total debt levels, net cash position, or leverage ratio like Debt/EBITDA.]
 
         ### 💸 Cash Flows
         - **Free Cash Flow:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the absolute FCF generated or FCF margin %.]
+          * **Evidence:** [Provide a brief sentence citing the absolute FCF generated or FCF margin %.]
         - **Operating Cash Flow:** [⬆️/➖/⬇️] | **Score:** [🔴/🟡/🟢]
-          * **Evidence (With Data):** [Provide a brief sentence citing the operating cash flow cash generation metric.]
+          * **Evidence:** [Provide a brief sentence citing the operating cash flow cash generation metric.]
 
         ## 📎 Sources
         - [Identify specific Consolidated Financial Statements, Balance Sheet, or Cash Flow footnotes from the primary official filing used]
