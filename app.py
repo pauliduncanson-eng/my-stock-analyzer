@@ -574,14 +574,8 @@ if submit_button and ticker:
         - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
         - **Trigger Condition:** [Define a clear operational or valuation parameter trigger to change position status.]
         """
-        try:
-            p8_output = generate_analysis_layer(ticker, p8_prompt)
-            st.markdown(p8_output, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Error executing Panel 8: {e}")
-            p8_output = f"Final Recommendation: {calculated_status}\nReasoning: {rule_justification}"
 
-    try:
+        try:
             p8_output = generate_analysis_layer(ticker, p8_prompt)
             st.markdown(p8_output, unsafe_allow_html=True)
         except Exception as e:
@@ -604,6 +598,20 @@ if submit_button and ticker:
         """)
         
         st.caption("🔒 Source Audit Trail: Active | Mode: Strict Investor Relations Filtering Only")
+
+    # ==================================================================
+    # 🔒 FIXED CRITICAL SESSION STATE INITIALIZATION FOR PDF EXPORTER
+    # ==================================================================
+    st.session_state["ticker_analyzed"] = ticker
+    st.session_state["pdf_p1"] = phase_output
+    st.session_state["pdf_p2"] = p2_output
+    st.session_state["pdf_p3"] = p3_output
+    st.session_state["pdf_p4"] = p4_output
+    st.session_state["pdf_p5"] = p5_output
+    st.session_state["pdf_p6"] = p6_output
+    st.session_state["pdf_p7"] = p7_output
+    st.session_state["pdf_p7_5"] = p7_5_output  
+    st.session_state["pdf_p8"] = p8_output
 
     # ==================================================================
     # 🔒 FIXED CRITICAL SESSION STATE INITIALIZATION FOR PDF EXPORTER
