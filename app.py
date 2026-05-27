@@ -680,7 +680,7 @@ if "ticker_analyzed" in st.session_state:
             pdf.multi_cell(0, 5, clean_text_for_pdf(analytical_content))
             pdf.ln(6)
             
-        return bytes(pdf.output(dest="S"))
+        return bytes(pdf.output(dest="S"))  
 
     if st.button("🔄 Clear Ticker & Start New Search", use_container_width=True):
         for key in ["ticker_analyzed", "active_ticker", "pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p7_5", "pdf_p8"]:
