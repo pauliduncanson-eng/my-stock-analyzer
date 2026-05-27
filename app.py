@@ -678,34 +678,7 @@ if submit_button and ticker:
     st.session_state["pdf_p5"] = p5_output
     st.session_state["pdf_p6"] = p6_output
     st.session_state["pdf_p7"] = p7_output
-    st.session_state["pdf_p7_5"] = p7_5_output  
-    st.session_state["pdf_p8"] = p8_output
-
-    # ==================================================================
-    # 🔒 FIXED CRITICAL SESSION STATE INITIALIZATION FOR PDF EXPORTER
-    # ==================================================================
-    st.session_state["ticker_analyzed"] = ticker
-    st.session_state["pdf_p1"] = phase_output
-    st.session_state["pdf_p2"] = p2_output
-    st.session_state["pdf_p3"] = p3_output
-    st.session_state["pdf_p4"] = p4_output
-    st.session_state["pdf_p5"] = p5_output
-    st.session_state["pdf_p6"] = p6_output
-    st.session_state["pdf_p7"] = p7_output
-    st.session_state["pdf_p7_5"] = p7_5_output  # Keeps our new TSR layout from crashing the PDF engine!
-    st.session_state["pdf_p8"] = p8_output
-
-    # ==================================================================
-    # 🔒 FIXED CRITICAL SESSION STATE INITIALIZATION FOR PDF EXPORTER
-    # ==================================================================
-    st.session_state["ticker_analyzed"] = ticker
-    st.session_state["pdf_p1"] = phase_output
-    st.session_state["pdf_p2"] = p2_output
-    st.session_state["pdf_p3"] = p3_output
-    st.session_state["pdf_p4"] = p4_output
-    st.session_state["pdf_p5"] = p5_output
-    st.session_state["pdf_p6"] = p6_output
-    st.session_state["pdf_p7"] = p7_output
+    st.session_state["pdf_p7_5"] = p7_5_output  # ✅ Safely stores your TSR Driver Card data
     st.session_state["pdf_p8"] = p8_output
 
 # ==================================================================
