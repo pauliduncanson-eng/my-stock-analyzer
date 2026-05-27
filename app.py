@@ -139,7 +139,7 @@ def contains_any(text, keywords):
 # ==================================================================
 # 🗂️ SIDEBAR SELECTION PANEL (RETAINED EXACTLY)
 # ==================================================================
-with st.sidebar.form(key="research_panel_form"):
+with st.form(key="research_panel_form"):
     st.header("🎛️ Research Controls")
     ticker_input = st.text_input("Add ticker to run stock analysis:", placeholder="e.g., Nebius Group NV (NBIS)")
     st.markdown("Enter both the company name and the ticker symbol to ensure perfect data collection according to Google Finance (e.g., *Rolls-Royce Holdings PLC LON:RR or 2Crsi SA EPA:AL2SI*).")
