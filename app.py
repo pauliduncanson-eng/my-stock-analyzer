@@ -137,13 +137,13 @@ def contains_any(text, keywords):
     return any(kw in text_lower for kw in keywords)
 
 # ==================================================================
-# 🗂️ SIDEBAR SELECTION PANEL (RETAINED EXACTLY)
+# 🗂️ MAIN HOMEPAGE SELECTION PANEL (FULLY UN-INDENTED TO CENTER)
 # ==================================================================
 with st.form(key="research_panel_form"):
-    st.header("🎛️ Research Controls")
-    ticker_input = st.text_input("Add ticker to run stock analysis:", placeholder="e.g., Nebius Group NV (NBIS)")
-    st.markdown("Enter both the company name and the ticker symbol to ensure perfect data collection according to Google Finance (e.g., *Rolls-Royce Holdings PLC LON:RR or 2Crsi SA EPA:AL2SI*).")
-    submit_button = st.form_submit_button(label="🚀 Run Analysis")
+st.header("🎛️ Research Controls")
+ticker_input = st.text_input("Add ticker to run stock analysis:", placeholder="e.g., Nebius Group NV (NBIS)")
+st.markdown("Enter both the company name and the ticker symbol to ensure perfect data collection according to Google Finance (e.g., *Rolls-Royce Holdings PLC LON:RR or 2Crsi SA EPA:AL2SI*).")
+submit_button = st.form_submit_button(label="🚀 Run Analysis")
 
 # Lock the ticker into session state on submit to prevent vanishing bugs
 if submit_button and ticker_input:
