@@ -639,17 +639,25 @@ if "ticker_analyzed" in st.session_state:
     def clean_text_for_pdf(text):
         if not text:
             return ""
+        # Remove any HTML tags
         text = re.sub(r'<[^>]*>', '', text)
+        # Remove markdown headers and bold syntax
         text = text.replace("**", "").replace("###", "").replace("##", "").replace("#", "")
         text = text.replace("---", "\n" + "-"*40 + "\n")
         
+        # Convert critical framework indicator symbols into readable text
         symbol_mappings = {
-            "🟩": "Green", "🟨": "Yellow", "🟥": "Red", "🟢": "Good", "🟡": "Average", "🔴": "Weak",
-            "✅": "PASS", "❌": "FAIL", "⚡": "", "⏳": "", "🚀": "", "🗂️": "", "🧠": "", 
-            "📊": "", "🎛️": "", "📈": "", "📉": "", "💎": "", "🛡️": "", "🎯": "", "📋": ""
+            "🟩": "Green", "🟨": "Yellow", "🟥": "Red", 
+            "🟢": "Good", "🟡": "Average", "🔴": "Weak",
+            "✅": "PASS", "❌": "FAIL"
         }
         for symbol, text_replacement in symbol_mappings.items():
             text = text.replace(symbol, text_replacement)
+        
+        # 🔥 PERMANENT FIX: Strip out all other miscellaneous emojis/symbols entirely 
+        # This keeps only standard keyboard characters (letters, numbers, basic punctuation)
+        text = re.sub(r'[^\x00-\x7F\x80-\xFF]', '', text)
+        
         return text.encode('latin-1', 'replace').decode('latin-1')
 
     def build_pdf_document():
