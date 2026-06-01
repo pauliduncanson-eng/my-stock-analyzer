@@ -446,9 +446,11 @@ if "active_ticker" in st.session_state:
     with st.expander("📊 Total Shareholder Return (TSR) Driver Card", expanded=True):
         st.markdown(p7_5_output)
         
+        # ==================================================================
+    # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (NUANCED DILUTION LOGIC)
     # ==================================================================
-    # 🧠 PANEL #8: SYSTEM SYNTHESIS RULES (EXACT ORIGINAL SCORING MATCH)
-    # ==================================================================
+    
+    # 1. Parse Panel 4 diagnostic colors
     p4_lines = [line.lower() for line in p4_output.split("\n") if "|" in line]
     
     rev_growth_color = "🟡"
@@ -469,14 +471,49 @@ if "active_ticker" in st.session_state:
         elif "shareholder" in line or "alignment" in line or "dilution" in line:
             alignment_color = "🔴" if "🔴" in line else ("🟢" if "🟢" in line else "🟡")
 
-    explosive_growth_detected = contains_any(p4_output + p3_output, ["100%", "triple-digit", "explosive", "doubled"])
+    # ==================================================================
+    # 🚀 NUANCED DILUTION ASSESSMENT FOR GROWTH COMPANIES
+    # ==================================================================
+    
+    def extract_pct(text, keyword):
+        match = re.search(rf"{keyword}.*?([+-]?\d+\.?\d*)%", text, re.IGNORECASE)
+        return float(match.group(1)) if match else None
 
-    if explosive_growth_detected and alignment_color == "🔴":
-        alignment_color = "🟡"
-        hyper_growth_pass = True
-    else:
-        hyper_growth_pass = False
+    def extract_value(text, keyword):
+        match = re.search(rf"{keyword}.*?([+-]?\d+\.?\d*)", text, re.IGNORECASE)
+        return float(match.group(1)) if match else None
 
+    # Pull raw numbers from earlier panels. Requires Evidence lines in Panel 3, 4, 6
+    rev_growth_pct = extract_pct(p4_output, "Revenue Growth") or extract_pct(p3_output, "Revenue")
+    shares_dilution_pct = extract_pct(p4_output, "Shareholder Alignment") 
+    fcf_value = extract_value(p6_output, "Free Cash Flow")
+
+    capex_heavy = contains_any(p6_output + p3_output, ["capex", "capital expenditure", "infrastructure", "property plant", "data center", "build out", "capacity"])
+    mgmt_guidance_fcf_positive = contains_any(p3_output + p7_output + p7_5_output, ["fcf positive", "cash flow positive", "free cash flow break", "cash flow break even"])
+
+    # Build 3-factor score: Growth >> Dilution, Capital to Assets, Runway Plan
+    growth_beats_dilution = False
+    if rev_growth_pct and shares_dilution_pct and shares_dilution_pct > 0:
+        if rev_growth_pct > shares_dilution_pct * 3:  # 3x rule: Rev growth must be 3x dilution
+            growth_beats_dilution = True
+
+    capital_to_assets = capex_heavy and contains_any(p3_output, ["growth", "expansion", "capacity", "commercialization"])
+    has_runway_plan = mgmt_guidance_fcf_positive
+
+    dilution_score = sum([growth_beats_dilution, capital_to_assets, has_runway_plan])
+    
+    # Override alignment_color for growth phases based on score
+    rule_justification_override = ""
+    if alignment_color == "🔴" and phase_num in ["1", "2", "3"]:
+        if dilution_score == 3:
+            alignment_color = "🟢"  # Neutral if all 3 conditions met
+            rule_justification_override = f"Strategic capital raise: {rev_growth_pct}% revenue growth with capex deployment and guidance to FCF positive. "
+        elif dilution_score >= 2:
+            alignment_color = "🟡"  # Downgrade from fatal to warning
+            rule_justification_override = f"Dilution present but partially offset by {rev_growth_pct}% growth velocity and capex deployment. "
+        # else: keep as 🔴 fatal
+
+    # Recalculate counts after potential override
     color_list = [rev_growth_color, margin_color, efficiency_color, asset_color, alignment_color]
     p4_red_count = color_list.count("🔴")
     p4_yellow_count = color_list.count("🟡")
@@ -487,28 +524,52 @@ if "active_ticker" in st.session_state:
     val_undervalued = contains_any(p7_output, ["undervalued", "🟢"])
     val_fairly = contains_any(p7_output, ["fairly valued", "fair value", "🟡"])
 
+    # ==================================================================
+    # 📊 FINAL DECISION TREE
+    # ==================================================================
     calculated_status = None
     rule_justification = ""
 
-    if phase_num == "1":
-        if p4_red_count > 0 and not hyper_growth_pass:
+    # PHASE 5: Always reject declining
+    if phase_num == "5":
+        calculated_status = "❌ PASS (Not Good Enough)"
+        rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
+
+    # PHASE 1-3: Check if nuanced dilution passed first
+    elif phase_num in ["1", "2", "3"] and alignment_color == "🟢":
+        calculated_status = "🚀 DEEP DIVE ASAP"
+        rule_justification = rule_justification_override + f"Phase {phase_num} Hyper-Conviction Growth Engine with strategic capital deployment."
+    
+    elif phase_num == "1" and alignment_color == "🟡":
+        calculated_status = "⏳ ADD TO WATCHLIST"
+        rule_justification = rule_justification_override + "Phase 1 profile with high growth but dilution requires monitoring of capital efficiency."
+
+    elif phase_num in ["2", "3"] and alignment_color == "🟡":
+        if p4_red_count <= 1:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = rule_justification_override + f"Solid Phase {phase_num} Growth profile. Dilution is a watch item but core metrics acceptable."
+        else:
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_justification = rule_justification_override + f"Phase {phase_num} Growth with excessive operating friction despite dilution controls."
+
+    # GLOBAL FATAL DILUTION CHECK: Only fires if not caught by nuanced rules above
+    elif alignment_color == "🔴":
+        calculated_status = "❌ PASS (Too Risky)"
+        rule_justification = f"Fatal structural flaw: Shares Outstanding +{shares_dilution_pct}% YoY with FCF of {fcf_value}. Indicates equity raises funding cash burn, not growth."
+
+    # PHASE 1: Standard startup filter
+    elif phase_num == "1":
+        if p4_red_count > 0:
             calculated_status = "❌ PASS (Too Risky)"
             rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
-        elif hyper_growth_pass or (alignment_color == "🟢" and p4_green_count >= 3):
+        elif alignment_color == "🟢" and p4_green_count >= 3:
             calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "Explosive Phase 1 profile detected. Shareholder dilution is balanced by structural hyper-growth velocity (>100% YoY), warranting close monitoring."
+            rule_justification = "High-quality Phase 1 startup profile meeting strict baseline structural indicators."
         else:
             calculated_status = "❌ PASS (Not Good Enough)"
             rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency thresholds."
 
-    elif phase_num == "5":
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
-
-    elif alignment_color == "🔴":
-        calculated_status = "❌ PASS (Too Risky)"
-        rule_justification = "Fatal structural flaw: Severe or accelerating shareholder dilution detected without sufficient topline growth velocity to compensate."
-
+    # PHASE 4: Mature compounder logic
     elif phase_num == "4":
         if rev_growth_color == "🔴" or val_overvalued:
             calculated_status = "❌ PASS (Not Good Enough)"
@@ -523,11 +584,9 @@ if "active_ticker" in st.session_state:
             calculated_status = "❌ PASS (Not Good Enough)"
             rule_justification = "Phase 4 asset fails to show the high-efficiency return metrics or margin of safety required to lock capital."
 
+    # PHASE 2-3: Standard growth filter if dilution was not fatal
     elif phase_num in ["2", "3"]:
-        if hyper_growth_pass:
-            calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_justification = f"Phase {phase_num} Hyper-Conviction Growth Engine. Dilution override activated due to verified explosive (>100%) revenue velocity scaling."
-        elif p4_red_count == 0 and p4_green_ratio >= 0.75:
+        if p4_red_count == 0 and p4_green_ratio >= 0.75:
             calculated_status = "🚀 DEEP DIVE ASAP"
             rule_justification = f"Phase {phase_num} High-Conviction Growth engine hitting pristine diagnostic bars. Flawless execution across velocity, margins, and capital metrics."
         elif p4_red_count <= 1:
@@ -541,7 +600,12 @@ if "active_ticker" in st.session_state:
         calculated_status = "⏳ ADD TO WATCHLIST"
         rule_justification = "System fallback logic triggered. Deflected to pipeline queue for structural manual verification."
 
-    with st.expander("⚖️ Panel #8: Final Investment Decision", expanded=True):
+    # ==================================================================
+    # 🧠 PANEL #8: CHIEF INVESTMENT OFFICER SYNTHESIS (WITH DATA RULES)
+    # ==================================================================
+    with st.expander("⚖ Panel #8: Final Investment Decision", expanded=True):
+        st.write("*Synthesizing framework layers into a final allocation recommendation...*")
+        
         p8_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialize the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
 
@@ -556,21 +620,21 @@ if "active_ticker" in st.session_state:
         Depending on the MANDATORY DESIGNATION provided above, adapt your breakdown inside the sections below using these parameters:
 
         1. If the status is "🚀 DEEP DIVE ASAP":
-           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity. If an override for explosive growth (e.g. Nebius style) occurred, explicitly frame the dilution as a positive, strategic capital deployment mechanism required to fund a generational land grab. Highlight why topline hyper-velocity trumps standard capital dilution guidelines.
-           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear (e.g., infrastructure execution risk, capacity utilization delays).
+           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity. If dilution was present but offset by growth/capex/guidance, explicitly frame the equity raise as a positive, strategic capital deployment mechanism required to fund a generational land grab. You must cite the specific Revenue Growth % and Shares Outstanding % from the data. Highlight why topline hyper-velocity trumps standard capital dilution guidelines.
+           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear (e.g., infrastructure execution risk, capacity utilization delays, guidance credibility).
 
         2. If the status is "⏳ ADD TO WATCHLIST":
-           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. Focus on scale confirmation, validation of unit economics, or near-term margins adjustments.
+           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. If dilution is the reason, cite the specific Shares Outstanding % vs FCF number. Focus on scale confirmation, validation of unit economics, or near-term margins adjustments.
            - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
 
         3. If the status contains "❌ PASS":
-           - **Core Investment Thesis:** Clearly diagnose that this asset failed the structural selection framework. Focus heavily on why the combination of life cycle constraints, toxic metrics (like dilution without growth), or poor efficiency creates a permanent destruction of capital risk.
+           - **Core Investment Thesis:** Clearly diagnose that this asset failed the structural selection framework. If failure is due to Shareholder Alignment/Dilution, you MUST cite the specific data point: "Shares Outstanding +X% YoY while TTM FCF was €Y". Distinguish between 'dilution funding losses' vs 'dilution funding growth capex'. Do NOT use generic phrases like 'toxic capital structure' without data. Focus heavily on why the combination of life cycle constraints, toxic metrics, or poor efficiency creates a permanent destruction of capital risk.
            - **Key Risks to Identify:** Outline the specific systemic risk factors, balance sheet or execution vulnerabilities that make this target completely uninvestable.
 
         Output ONLY the markdown format below. Ensure the layout matches perfectly. Use the specific HTML structure provided below for the Final Recommendation to make it pop out with massive text and clear separation.
 
-        # ⚖️ Assessment Summary: {ticker}
-        <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-left: 5px solid #ff4b4b; border-radius: 4px; margin: 15px 0;">
+        # ⚖ Assessment Summary: {ticker}
+        <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-left: 5px solid #ff4b; border-radius: 4px; margin: 15px 0;">
             <h2 style="margin: 0; padding: 0; font-size: 28px; font-weight: 800; letter-spacing: 0.5px;">
                 Final Recommendation: {calculated_status}
             </h2>
@@ -579,14 +643,13 @@ if "active_ticker" in st.session_state:
         **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
         ### 📋 Core Investment Thesis & Risks
-        - **Core Investment Thesis:** [Provide a detailed 2-3 sentence strategic rationale customized to the designation parameters specified above.]
+        - **Core Investment Thesis:** [Provide a detailed 2-3 sentence strategic rationale customized to the designation parameters specified above. Must include hard numbers if dilution is discussed.]
         - **Key Risks to Identify:** [Provide a detailed 2-3 sentence breakdown customized to the designation parameters specified above.]
 
-        ### 🛠️ Required Next Steps
+        ### 🛠 Required Next Steps
         - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
         - **Trigger Condition:** [Define a clear operational or valuation parameter trigger to change position status.]
         """
-
         try:
             p8_output = generate_analysis_layer(ticker, p8_prompt)
             st.markdown(p8_output, unsafe_allow_html=True)
