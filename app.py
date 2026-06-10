@@ -385,26 +385,6 @@ def extract_citations_from_panels(*panel_texts):
     return list(citations.keys())
 
 # After parsing p4_output, p7_output, p7_5_output:
-p9_output = "## 📚 Consolidated Sources & Citations\n\n"
-
-raw_citations = extract_citations_from_panels(p4_output, p7_output, p7_5_output)
-
-if raw_citations:
-    p9_output += "### Sources Referenced in Analysis\n"
-    for i, cite in enumerate(raw_citations, 1):
-        p9_output += f"- {cite}\n"
-else:
-    p9_output += "⚠️ No explicit citations found in analysis panels. Verify data sources manually.\n"
-
-p9_output += "\n### Data Gaps & Limitations\n"
-# Scan for [Management Guidance Not Disclosed] or similar
-gaps = re.findall(r'\[([^\]]*(?:Not Disclosed|Not Provided|Unavailable)[^\]]*)\]',
-                  p4_output + p7_output + p7_5_output)
-if gaps:
-    for gap in set(gaps):
-        p9_output += f"- {gap}\n"
-else:
-    p9_output += "- No material data gaps flagged in analysis.\n"
 
     col1, col2 = st.columns(2)
     with col1:
@@ -510,7 +490,54 @@ Replace with:
             p7_output = "⚠️ Valuation calculation framework execution error."
             p7_5_output = "⚠️ TSR Matrix compilation unavailable."
             p9_output = "⚠️ Sources Appendix unavailable."
+        # --- AUTO-GENERATE SOURCES APPENDIX ---
+        import re
+        from collections import OrderedDict
 
+        def extract_citations_from_panels(*panel_texts):
+            citations = OrderedDict()
+            patterns = [
+                r'\[(\d+)\]\s*\[([^\]]+)\]',
+                r'\[([^\]]*(?:10-[KQ]|20-F|8-K|Form)[^\]]*)\]',
+                r'\[([^\]]*(?:Earnings Call|Investor Presentation|Press Release)[^\]]*)\]',
+                r'\[([^\]]*(?:S&P|Capital IQ|Morningstar|TIKR|Trefis|Macrotrends)[^\]]*)\]',
+                r'(https?://[^\s\)]+)',
+                r'(\d{10}-\d{2}-\d{6})',
+            ]
+            for text in panel_texts:
+                if not text:
+                    continue
+                for pattern in patterns:
+                    matches = re.findall(pattern, text, re.IGNORECASE)
+                    for match in matches:
+                        if isinstance(match, tuple):
+                            citation = f"[{match[0]}] {match[1]}" if match[0].isdigit() else match[1]
+                        else:
+                            citation = match
+                        citation = citation.strip()
+                        if len(citation) > 10:
+                            citations[citation] = True
+            return list(citations.keys())
+
+        # p4_output, p7_output, p7_5_output now exist, so this is safe
+        raw_citations = extract_citations_from_panels(p4_output, p7_output, p7_5_output)
+
+        p9_output = "## 📚 Consolidated Sources & Citations\n\n"
+        if raw_citations:
+            p9_output += "### Sources Referenced in Analysis\n"
+            for cite in raw_citations:
+                p9_output += f"- {cite}\n"
+        else:
+            p9_output += "⚠️ No explicit citations found in analysis panels.\n"
+
+        p9_output += "\n### Data Gaps & Limitations\n"
+        gaps = re.findall(r'\[([^\]]*(?:Not Disclosed|Not Provided|Unavailable)[^\]]*)\]',
+                          p4_output + p7_output + p7_5_output)
+        if gaps:
+            for gap in set(gaps):
+                p9_output += f"- {gap}\n"
+        else:
+            p9_output += "- No material data gaps flagged in analysis.\n"
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
         st.markdown(p4_output)
 
@@ -521,7 +548,7 @@ Replace with:
         st.markdown(p7_5_output)
         
     with st.expander("📚 Sources & Citations Appendix", expanded=False):
-        st.markdown(p9_output)
+       st.markdown(p9_output)
         
     # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (NUANCED DILUTION LOGIC)
