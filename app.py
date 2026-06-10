@@ -569,53 +569,53 @@ Replace with:
         rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
 
     if phase_num == "1":  # STARTUP PHASE RULES - REWRITTEN
-    import re
+        import re
     
-    # --- PARSE EXISTING PANEL 5 TEXT - NO PROMPT CHANGES ---
-    def get_p5(field):
-        match = re.search(rf'{field}:\s*([^\n\r]+)', p5_output, re.IGNORECASE)
-        return match.group(1).strip() if match else "Not Found"
+        # --- PARSE EXISTING PANEL 5 TEXT - NO PROMPT CHANGES ---
+        def get_p5(field):
+            match = re.search(rf'{field}:\s*([^\n\r]+)', p5_output, re.IGNORECASE)
+            return match.group(1).strip() if match else "Not Found"
     
-    growth_potential = get_p5("Future Growth Potential")
-    growth_direction = get_p5("Future Growth Direction")
-    financial_health = get_p5("Overall Financial Health")
-    moat_trend = get_p5("Moat Trend")
-    risk_rating = get_p5("Overall Risk Rating")
+        growth_potential = get_p5("Future Growth Potential")
+        growth_direction = get_p5("Future Growth Direction")
+        financial_health = get_p5("Overall Financial Health")
+        moat_trend = get_p5("Moat Trend")
+        risk_rating = get_p5("Overall Risk Rating")
     
-    # --- TIER 1: HARD PASS - Auto-reject conditions ---
-    if "High" in risk_rating:
-        calculated_status = "❌ PASS (Too Risky)"
-        rule_reason = f"🔴 STARTUP PASS: High Risk Rating detected. Startups with High Risk fail watchlist criteria regardless of growth. Health: {financial_health}, Risk: {risk_rating}"
+        # --- TIER 1: HARD PASS - Auto-reject conditions ---
+        if "High" in risk_rating:
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_reason = f"🔴 STARTUP PASS: High Risk Rating detected. Startups with High Risk fail watchlist criteria regardless of growth. Health: {financial_health}, Risk: {risk_rating}"
     
-    elif "Weak" in financial_health or "Distressed" in financial_health:
-        calculated_status = "❌ PASS (Too Risky)"
-        rule_reason = f"🔴 STARTUP PASS: Financial Health too weak: {financial_health}. Insufficient runway for execution."
+        elif "Weak" in financial_health or "Distressed" in financial_health:
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_reason = f"🔴 STARTUP PASS: Financial Health too weak: {financial_health}. Insufficient runway for execution."
     
-    # --- TIER 2: WATCHLIST - Minimum viable startup ---
-    elif (
-        "High" in growth_potential and
-        "Accelerating" in growth_direction and
-        any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]) and
-        ("Low" in risk_rating or "Moderate" in risk_rating)
-    ):
-        # --- TIER 3: DEEP DIVE - Check for moat ---
-        if "Widening" in moat_trend:
-            calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_reason = f"🟢 STARTUP DEEP DIVE: High + Accelerating Growth, {financial_health} Health, Widening Moat, {risk_rating} Risk. Meets all criteria for immediate action."
+        # --- TIER 2: WATCHLIST - Minimum viable startup ---
+        elif (
+            "High" in growth_potential and
+            "Accelerating" in growth_direction and
+            any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]) and
+            ("Low" in risk_rating or "Moderate" in risk_rating)
+        ):
+            # --- TIER 3: DEEP DIVE - Check for moat ---
+            if "Widening" in moat_trend:
+                calculated_status = "🚀 DEEP DIVE ASAP"
+                rule_reason = f"🟢 STARTUP DEEP DIVE: High + Accelerating Growth, {financial_health} Health, Widening Moat, {risk_rating} Risk. Meets all criteria for immediate action."
+            else:
+                calculated_status = "⏳ ADD TO WATCHLIST"
+                rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {financial_health} Health, {risk_rating} Risk. BLOCKED from Deep Dive: Moat Trend is '{moat_trend}', not Widening."
+    
+        # --- TIER 4: DEFAULT PASS ---
         else:
-            calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {financial_health} Health, {risk_rating} Risk. BLOCKED from Deep Dive: Moat Trend is '{moat_trend}', not Widening."
-    
-    # --- TIER 4: DEFAULT PASS ---
-    else:
-        fail_list = []
-        if "High" not in growth_potential: fail_list.append(f"Growth Potential: {growth_potential}")
-        if "Accelerating" not in growth_direction: fail_list.append(f"Growth Direction: {growth_direction}")
-        if not any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]): 
-            fail_list.append(f"Financial Health: {financial_health}")
+            fail_list = []
+            if "High" not in growth_potential: fail_list.append(f"Growth Potential: {growth_potential}")
+            if "Accelerating" not in growth_direction: fail_list.append(f"Growth Direction: {growth_direction}")
+            if not any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]): 
+                fail_list.append(f"Financial Health: {financial_health}")
         
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_reason = f"🔴 STARTUP PASS: Failed watchlist criteria: {'; '.join(fail_list)}"
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_reason = f"🔴 STARTUP PASS: Failed watchlist criteria: {'; '.join(fail_list)}"
 
     # GLOBAL FATAL DILUTION CHECK: Only fires if not caught by nuanced rules above
     elif alignment_color == "🔴":
