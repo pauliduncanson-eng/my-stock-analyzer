@@ -569,105 +569,89 @@ Replace with:
         rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
 
     if phase_num == 1:  # STARTUP PHASE RULES - REWRITTEN
-        import re
+    import re
     
-        # --- PARSE EXISTING PANEL 5 TEXT - NO PROMPT CHANGES ---
-        def get_p5(field):
-            match = re.search(rf'{field}:\s*([^\n\r]+)', p5_output, re.IGNORECASE)
-            return match.group(1).strip() if match else "Not Found"
+    # --- PARSE EXISTING PANEL 5 TEXT ---
+    def get_p5(field):
+        match = re.search(rf'{field}:\s*([^\n\r]+)', p5_output, re.IGNORECASE)
+        return match.group(1).strip() if match else "Not Found"
     
-        growth_potential = get_p5("Future Growth Potential")
-        growth_direction = get_p5("Future Growth Direction")
-        financial_health = get_p5("Overall Financial Health")
-        moat_trend = get_p5("Moat Trend")
-        risk_rating = get_p5("Overall Risk Rating")
+    growth_potential = get_p5("Future Growth Potential")
+    growth_direction = get_p5("Future Growth Direction")
+    financial_health = get_p5("Overall Financial Health")
+    moat_trend = get_p5("Moat Trend")
+    risk_rating = get_p5("Overall Risk Rating")
     
-        # --- TIER 1: HARD PASS - Auto-reject conditions ---
-        # QS fails here if Risk Rating is "High"
-        if "High" in risk_rating:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_reason = f"🔴 STARTUP PASS: High Risk Rating detected. Startups with High Risk fail watchlist criteria regardless of growth. Health: {financial_health}, Risk: {risk_rating}"
+    # --- TIER 1: HARD PASS - Auto-reject conditions ---
+    if "High" in risk_rating:
+        calculated_status = "❌ PASS (Too Risky)"
+        rule_reason = f"🔴 STARTUP PASS: High Risk Rating detected. Health: {financial_health}, Risk: {risk_rating}"
     
-        elif "Weak" in financial_health or "Distressed" in financial_health:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_reason = f"🔴 STARTUP PASS: Financial Health too weak: {financial_health}. Insufficient runway for execution."
+    elif "Weak" in financial_health or "Distressed" in financial_health:
+        calculated_status = "❌ PASS (Too Risky)"
+        rule_reason = f"🔴 STARTUP PASS: Financial Health too weak: {financial_health}"
     
-        # --- TIER 2: WATCHLIST - Minimum viable startup ---
-        elif (
-            "High" in growth_potential and
-            "Accelerating" in growth_direction and
-            any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]) and
-            "Low" in risk_rating or "Moderate" in risk_rating
-        ):
-            # --- TIER 3: DEEP DIVE - Check for moat ---
-            if "Widening" in moat_trend:
-                calculated_status = "🚀 DEEP DIVE ASAP"
-                rule_reason = f"🟢 STARTUP DEEP DIVE: High + Accelerating Growth, {financial_health} Health, Widening Moat, {risk_rating} Risk. Meets all criteria for immediate action."
-            else:
-                calculated_status = "⏳ ADD TO WATCHLIST"
-                rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {financial_health} Health, {risk_rating} Risk. BLOCKED from Deep Dive: Moat Trend is '{moat_trend}', not Widening."
-    
-        # --- TIER 4: DEFAULT PASS ---
+    # --- TIER 2: WATCHLIST - Minimum viable startup ---
+    elif (
+        "High" in growth_potential and
+        "Accelerating" in growth_direction and
+        any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]) and
+        ("Low" in risk_rating or "Moderate" in risk_rating)
+    ):
+        # --- TIER 3: DEEP DIVE - Check for moat ---
+        if "Widening" in moat_trend:
+            calculated_status = "🚀 DEEP DIVE ASAP"
+            rule_reason = f"🟢 STARTUP DEEP DIVE: High + Accelerating Growth, {financial_health} Health, Widening Moat, {risk_rating} Risk."
         else:
-            fail_list = []
-            if "High" not in growth_potential: fail_list.append(f"Growth Potential: {growth_potential}")
-            if "Accelerating" not in growth_direction: fail_list.append(f"Growth Direction: {growth_direction}")
-            if not any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]): 
-                fail_list.append(f"Financial Health: {financial_health}")
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {financial_health} Health, {risk_rating} Risk. BLOCKED: Moat Trend is '{moat_trend}', not Widening."
+    
+    # --- TIER 4: DEFAULT PASS ---
+    else:
+        fail_list = []
+        if "High" not in growth_potential: fail_list.append(f"Growth Potential: {growth_potential}")
+        if "Accelerating" not in growth_direction: fail_list.append(f"Growth Direction: {growth_direction}")
+        if not any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]): 
+            fail_list.append(f"Financial Health: {financial_health}")
         
-            calculated_status = "❌ PASS (Not Good Enough)"
-            rule_reason = f"🔴 STARTUP PASS: Failed watchlist criteria: {'; '.join(fail_list)}"
-
-    elif phase_num in ["2", "3"]:  # RAPID GROWTH - KEEP YOUR EXISTING LOGIC FOR NOW
-        # Your existing Phase 2/3 logic stays here unchanged for now
-        if alignment_color == "🔴":
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_reason = rule_justification_override + f"Phase {phase_num} Growth asset disqualified due to critical flaws."
-        elif alignment_color == "🟢":
-            calculated_status = "🚀 DEEP DIVE ASAP"
-            rule_reason = rule_justification_override + f"Phase {phase_num} Hyper-Conviction Growth Engine."
-        elif alignment_color == "🟡":
-            calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_reason = rule_justification_override + f"Solid Phase {phase_num} Growth profile. Monitoring."
-        else:
-            calculated_status = "❌ PASS (Not Good Enough)"
-            rule_reason = rule_justification_override + f"Phase {phase_num} Growth with excessive operating friction."
-
-    elif phase_num == "4":  # MATURE - KEEP EXISTING
-        # Your existing Phase 4 logic stays here
-        if alignment_color == "🔴":
-            calculated_status = "❌ PASS (Not Good Enough)"
-        elif alignment_color == "🟢":
-            calculated_status = "🚀 DEEP DIVE ASAP"
-        elif alignment_color == "🟡":
-            calculated_status = "⏳ ADD TO WATCHLIST"
-    else:
         calculated_status = "❌ PASS (Not Good Enough)"
+        rule_reason = f"🔴 STARTUP PASS: Failed watchlist criteria: {'; '.join(fail_list)}"
 
-    elif phase_num == "5":
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_reason = "Phase 5 Decline: Company in terminal decline."
-
-    else:
-        calculated_status = "❌ PASS (Not Good Enough)"
-        rule_reason = f"Unknown phase: {phase_num}"
-
-        # PHASE 1-3: Check if nuanced dilution passed first
-    elif phase_num in ["1", "2", "3"] and alignment_color == "🟢":
+# --- PHASE 2 & 3: RAPID GROWTH - Keep existing logic for now ---
+elif phase_num in ["2", "3"]:
+    if alignment_color == "🔴":
+        calculated_status = "❌ PASS (Too Risky)"
+        rule_reason = rule_justification_override + f"Phase {phase_num} Growth asset disqualified due to critical flaws."
+    elif alignment_color == "🟢":
         calculated_status = "🚀 DEEP DIVE ASAP"
-        rule_justification = rule_justification_override + f"Phase {phase_num} Hyper-Conviction Growth Engine with strategic capital deployment."
-    
-    elif phase_num == "1" and alignment_color == "🟡":
+        rule_reason = rule_justification_override + f"Phase {phase_num} Hyper-Conviction Growth Engine."
+    elif alignment_color == "🟡":
         calculated_status = "⏳ ADD TO WATCHLIST"
-        rule_justification = rule_justification_override + "Phase 1 profile with high growth but dilution requires monitoring of capital efficiency."
+        rule_reason = rule_justification_override + f"Solid Phase {phase_num} Growth profile. Monitoring."
+    else:
+        calculated_status = "❌ PASS (Not Good Enough)"
+        rule_reason = rule_justification_override + f"Phase {phase_num} Growth with excessive operating friction."
 
-    elif phase_num in ["2", "3"] and alignment_color == "🟡":
-        if p4_red_count <= 1:
-            calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = rule_justification_override + f"Solid Phase {phase_num} Growth profile. Dilution is a watch item but core metrics acceptable."
-        else:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_justification = rule_justification_override + f"Phase {phase_num} Growth with excessive operating friction despite dilution controls."
+# --- PHASE 4: MATURE ---
+elif phase_num == "4":
+    if alignment_color == "🔴":
+        calculated_status = "❌ PASS (Not Good Enough)"
+    elif alignment_color == "🟢":
+        calculated_status = "🚀 DEEP DIVE ASAP"
+    elif alignment_color == "🟡":
+        calculated_status = "⏳ ADD TO WATCHLIST"
+    else:
+        calculated_status = "❌ PASS (Not Good Enough)"
+
+# --- PHASE 5: DECLINE ---
+elif phase_num == "5":
+    calculated_status = "❌ PASS (Not Good Enough)"
+    rule_reason = "Phase 5 Decline: Company in terminal decline."
+
+# --- CATCH-ALL FOR UNKNOWN PHASE ---
+else:
+    calculated_status = "❌ PASS (Not Good Enough)"
+    rule_reason = f"Unknown phase: {phase_num}"
 
     # GLOBAL FATAL DILUTION CHECK: Only fires if not caught by nuanced rules above
     elif alignment_color == "🔴":
