@@ -476,9 +476,9 @@ Replace with:
         st.markdown(p7_5_output)
         
     with st.expander("📚 Sources & Citations Appendix", expanded=False):
-    st.markdown(p9_output)
+        st.markdown(p9_output)
         
-        # ==================================================================
+    # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (NUANCED DILUTION LOGIC)
     # ==================================================================
     
