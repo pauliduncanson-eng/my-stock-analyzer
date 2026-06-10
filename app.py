@@ -387,7 +387,7 @@ def extract_citations_from_panels(*panel_texts):
 # After parsing p4_output, p7_output, p7_5_output:
 p9_output = "## 📚 Consolidated Sources & Citations\n\n"
 
-raw_citations = extract_citations_from_panels(p4_output, p7_output, p7_5_output, p8_output)
+raw_citations = extract_citations_from_panels(p4_output, p7_output, p7_5_output)
 
 if raw_citations:
     p9_output += "### Sources Referenced in Analysis\n"
