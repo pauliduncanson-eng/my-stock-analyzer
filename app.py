@@ -338,16 +338,23 @@ if "active_ticker" in st.session_state:
         === PANEL_9_START ===
         # 📚 Consolidated Sources Appendix: {ticker}
         ## Primary Filings Used
-        [List all 10-K, 10-Q, 20-F, Annual Reports accessed with fiscal year and direct URL or EDGAR accession number]
-
-        ## Management Communications
-        [List Earnings Call Dates, IR Day Presentations, Press Releases with dates and URL]
-
+        [Format: "Document Name, Fiscal Period, Section/Page, URL or Accession No."]
+        Example: "10-Q Q1 2026, Financial Statements Note 12, p.39, 0001652044-26-000073"
+        
+        ## Management Communications  
+        [Format: "Type, Date, Title/Slide, URL"]
+        Example: "Earnings Call, 2026-04-29, Q1 2026 Prepared Remarks, https://abc.xyz/..."
+        
         ## Consensus & Peer Data
-        [List any consensus source, sector reports, or peer filings used for benchmarking]
-
+        [Format: "Provider, Report Name, Date, Metric Used"]
+        Example: "S&P Capital IQ, Software Industry Multiples, June 2026, EV/EBITDA median"
+        
         ## Data Gaps & Limitations
-        [Explicitly state any metric marked [Management Guidance Not Disclosed] and impact on analysis confidence]
+        [List any metric marked [Management Guidance Not Disclosed] and impact on confidence level]
+        
+        🚨 CRITICAL: DO NOT REPEAT CONTENT FROM PANEL_1 THROUGH PANEL_8. 
+        🚨 CRITICAL: DO NOT INCLUDE MARKERS LIKE "=== PANEL_X_START ===" OR TABLES FROM OTHER PANELS.
+        🚨 CRITICAL: ONLY OUTPUT BULLET LISTS OF SOURCES USING THE FORMATS ABOVE.
         === PANEL_9_END ===
         """
         try:
