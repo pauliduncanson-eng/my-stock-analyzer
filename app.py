@@ -374,7 +374,7 @@ if "active_ticker" in st.session_state:
         - Your primary search queries MUST prioritize official financial nodes: "Company Investor Relations", "SEC EDGAR 10-K/10-Q", "Annual Report PDF", "Regulatory Filings", and "Earnings Call Transcript".
         - For forward-looking indicators, revenue outlooks, or capacity targets, use EXCLUSIVELY official corporate guidance issued directly by management in official press releases or IR portals.
         - STRICTLY FORBIDDEN: Do not ingest data, commentary, target figures, or assertions from third-party blogs, YouTube analysis videos, Substack opinion pieces, or retail forum channels (e.g., Reddit, Stocktwits). If official management guidance is unavailable for a metric, flag it as [Management Guidance Not Disclosed] instead of substituting speculative third-party targets.
-
+Replace with:
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for target: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
         Step 1: Use your Google Search tool to find today's current date and year (2026).
         Step 2: Source recent filings (10-Q/10-K or international IR Annual Reports/investor presentations if non-US). Gather current share price, diluted share count, cash, debt, and consensus NTM (next-twelve-month) metrics. Calculate EV = Market Cap + Debt - Cash. Ensure currency consistency (e.g. convert to Euros if analyzing European operations).
