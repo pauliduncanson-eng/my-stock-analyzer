@@ -199,7 +199,7 @@ if "active_ticker" in st.session_state:
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
         macro_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine specializing in microeconomic moats and fundamental analysis. Your target stock identifier/company name is: '{ticker}'.
+        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine specialising in microeconomic moats and fundamental analysis. Your target stock identifier/company name is: '{ticker}'.
         
         Step 1: Use your Google Search tool to find today's current date and year (2026).
         Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for target '{ticker}'.
@@ -337,24 +337,26 @@ if "active_ticker" in st.session_state:
 
         === PANEL_9_START ===
         # 📚 Consolidated Sources Appendix: {ticker}
+
+        OUTPUT_FORMAT: You must return ONLY a markdown list. No tables, no headers from other panels, no explanatory text.
+
         ## Primary Filings Used
-        [Format: "Document Name, Fiscal Period, Section/Page, URL or Accession No."]
-        Example: "10-Q Q1 2026, Financial Statements Note 12, p.39, 0001652044-26-000073"
-        
-        ## Management Communications  
-        [Format: "Type, Date, Title/Slide, URL"]
-        Example: "Earnings Call, 2026-04-29, Q1 2026 Prepared Remarks, https://abc.xyz/..."
-        
+        - Document: [Name], Period: [Q1 2026], Section: [Note 12, p.39], ID: [0001652044-26-000073]
+
+        ## Management Communications
+        - Type: [Earnings Call], Date: [2026-04-29], Reference: [Q1 2026 Prepared Remarks], URL: [https://...]
+
         ## Consensus & Peer Data
-        [Format: "Provider, Report Name, Date, Metric Used"]
-        Example: "S&P Capital IQ, Software Industry Multiples, June 2026, EV/EBITDA median"
-        
+        - Provider: [S&P Capital IQ], Report: [Software Multiples], Date: [June 2026], Used_For: [EV/EBITDA median]
+
         ## Data Gaps & Limitations
-        [List any metric marked [Management Guidance Not Disclosed] and impact on confidence level]
-        
-        🚨 CRITICAL: DO NOT REPEAT CONTENT FROM PANEL_1 THROUGH PANEL_8. 
-        🚨 CRITICAL: DO NOT INCLUDE MARKERS LIKE "=== PANEL_X_START ===" OR TABLES FROM OTHER PANELS.
-        🚨 CRITICAL: ONLY OUTPUT BULLET LISTS OF SOURCES USING THE FORMATS ABOVE.
+        - [Metric]: [Management Guidance Not Disclosed], Impact: [Reduced confidence in NTM estimates]
+
+        VALIDATION_RULES:
+        1. If you output "===", "PANEL_", "📊", "💰", "🚀", or "⚠️" you have failed.
+        2. If you output more than 20 lines total, you have failed.
+        3. If you output any numbers not in a source citation, you have failed.
+        4. Only output the 4 sections above with bullet points starting with "- ".
         === PANEL_9_END ===
         """
         try:
