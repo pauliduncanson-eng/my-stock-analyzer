@@ -402,14 +402,19 @@ Replace with:
         - **Company:** {ticker}
         - **Phase:** {phase_num}
         - **Summary Valuation Rating:** [MANDATORY EVALUATION: State strictly as either **Undervalued 🟢**, **Fairly Valued 🟡**, or **Overvalued 🔴** based on the percentile comparison rules above]
-        - **Target Phase Framework applied:** Valuation Method for Phase {phase_num} (plus any applicable Industry Override)
-        - **Calculated Multiple / Model output:** [Provide exact multiple or valuation range]
-        - **Benchmark Sector Context:** [Provide explicit text evaluating current multiples relative to sector medians]
-        - **Key Drivers:** [List core components]
-        - **Sensitivity:** [Key assumptions]
+        - **Valuation Methods Applied:** [List 2-3 specific methods used, e.g., DCF, EV/EBITDA multiple, EV/Sales, P/E, SOTP. Explain why each is appropriate for Phase {phase_num}]
+        - **Implied Valuation Range:** [Provide explicit low, base, and high case per-share values or EV. Example: Low €18 | Base €24 | High €31]
+        - **Current Price vs Range:** [State current share price and where it sits: e.g., "Current €21 → 12% below Base Case"]
+        - **Key Model Inputs:** [WACC %, Terminal Growth %, NTM EBITDA, Revenue CAGR %, etc. Show actual numbers used]
+        - **Benchmark Sector Context:** [Compare your base-case multiple vs sector median and top-quartile peers. Cite numbers]
+        - **Sensitivity Table:** [Show how Base Case value changes with +/-1% WACC or +/-0.5% terminal growth]
 
-        ## 📎 Sources
-        [1] Source Name (Filing/IR Report)
+        ## 📎 Valuation Sources & Methodology
+        [1] [Primary 10-K/10-Q or Annual Report: name, fiscal period, page/section for key numbers]
+        [2] [Official IR Presentation or Earnings Call Transcript: date, slide/page for guidance used]
+        [3] [Consensus Estimates Source: e.g., Company-compiled consensus, Visible Alpha, FactSet – state if primary]
+        [4] [Sector Multiple Benchmark Source: Damodaran, S&P Capital IQ industry report, or peer filing median]
+        [5] [Any Industry Override source if applied: e.g., SaaS Rule of 40 comp sheet, Bank P/TBV methodology]
         === PANEL_7_END ===
 
         ---
