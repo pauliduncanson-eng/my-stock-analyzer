@@ -590,18 +590,65 @@ Replace with:
         calculated_status = "❌ PASS (Too Risky)"
         rule_justification = f"Fatal structural flaw: Shares Outstanding +{shares_dilution_pct}% YoY with FCF of {fcf_value}. Indicates equity raises funding cash burn, not growth."
 
-    # PHASE 1: Standard startup filter
-    elif phase_num == "1":
-        if p4_red_count > 0:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
-        elif alignment_color == "🟢" and p4_green_count >= 3:
-            calculated_status = "⏳ ADD TO WATCHLIST"
-            rule_justification = "High-quality Phase 1 startup profile meeting strict baseline structural indicators."
+    if phase_num == 1 or phase == "Startup":  # STARTUP PHASE RULES
+    import re
+    
+    # --- EXTRACT FROM PANEL 3 OUTPUT ---
+    def extract_panel_field(text, field_name):
+        pattern = rf"### {re.escape(field_name)}:\s*([^\n]+)"
+        match = re.search(pattern, text)
+        return match.group(1).strip() if match else ""
+    
+    future_growth_potential = extract_panel_field(p3_output, "Future Growth Potential")
+    future_growth_direction = extract_panel_field(p3_output, "Future Growth Direction")
+    
+    # These aren't in Panel 3 — you need to tell me where they are
+    # For now, we'll default them so code doesn't break
+    overall_financial_health = "Moderate"  # TODO: Extract from Panel 5 or 6
+    moat_trend = "Stable"                  # TODO: Extract from Panel 5
+    risk_rating = "Moderate"               # TODO: Extract from Panel 5 or 6
+    
+    # --- STARTUP RULES LOGIC ---
+    # RULE 1: Minimum bar for ADD TO WATCHLIST
+    watchlist_eligible = (
+        "High" in future_growth_potential and 
+        "Accelerating" in future_growth_direction and
+        ("Moderate" in overall_financial_health or "Strong" in overall_financial_health or "Excellent" in overall_financial_health)
+    )
+    
+    # RULE 2: Additional requirements for DEEP DIVE ASAP
+    deep_dive_eligible = (
+        watchlist_eligible and  # Must meet watchlist criteria first
+        "Widening" in moat_trend and
+        ("Low" in risk_rating or "Moderate" in risk_rating)
+    )
+    
+    # APPLY THE RULES
+    if deep_dive_eligible:
+        calculated_status = "🚀 DEEP DIVE ASAP"
+        rule_reason = f"🟢 STARTUP DEEP DIVE: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Financial Health, {moat_trend} Moat, {risk_rating} Risk. Meets all criteria."
+    
+    elif watchlist_eligible:
+        calculated_status = "⏳ ADD TO WATCHLIST"
+        if "Widening" not in moat_trend:
+            rule_reason = f"🟡 STARTUP WATCHLIST: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Health. BLOCKED from Deep Dive: Moat Trend is {moat_trend}, not Widening."
+        elif "High" in risk_rating:
+            rule_reason = f"🟡 STARTUP WATCHLIST: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Health. BLOCKED from Deep Dive: Risk is {risk_rating}."
         else:
-            calculated_status = "❌ PASS (Not Good Enough)"
-            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency thresholds."
-
+            rule_reason = f"🟡 STARTUP WATCHLIST: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Health. Monitoring for moat expansion."
+    
+    else:
+        calculated_status = "❌ PASS (Too Risky)"
+        fail_reasons = []
+        if "High" not in future_growth_potential:
+            fail_reasons.append(f"Growth Potential: {future_growth_potential}")
+        if "Accelerating" not in future_growth_direction:
+            fail_reasons.append(f"Growth Direction: {future_growth_direction}")
+        if "Moderate" not in overall_financial_health and "Strong" not in overall_financial_health:
+            fail_reasons.append(f"Financial Health: {overall_financial_health}")
+        
+        rule_reason = f"🔴 STARTUP PASS: Failed criteria: {'; '.join(fail_reasons)}"
+        
     # PHASE 4: Mature compounder logic
     elif phase_num == "4":
         if rev_growth_color == "🔴" or val_overvalued:
@@ -640,7 +687,7 @@ Replace with:
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
         p8_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialize the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialise the data gathered across our research framework for the target asset: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
          
