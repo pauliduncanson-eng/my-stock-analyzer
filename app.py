@@ -590,7 +590,7 @@ Replace with:
         calculated_status = "❌ PASS (Too Risky)"
         rule_justification = f"Fatal structural flaw: Shares Outstanding +{shares_dilution_pct}% YoY with FCF of {fcf_value}. Indicates equity raises funding cash burn, not growth."
 
-    if phase_num == 1 or phase == "Startup":  # STARTUP PHASE RULES
+    if phase_num == 1:  # STARTUP PHASE RULES
         # Extract the key metrics from your panels first
         import re  # ✅ Now indented 4 spaces
     
