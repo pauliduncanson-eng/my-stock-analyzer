@@ -459,6 +459,7 @@ Replace with:
             p4_output = parse_panel(macro_val_output, "=== PANEL_4_START ===", "=== PANEL_4_END ===", "### 📊 Phase")
             p7_output = parse_panel(macro_val_output, "=== PANEL_7_START ===", "=== PANEL_7_END ===", "### 💰 Phase-Appropriate")
             p7_5_output = parse_panel(macro_val_output, "=== PANEL_7_5_START ===", "=== PANEL_7_5_END ===", "### 📊 Total Shareholder Return")
+            p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")  # <-- ADD THIS
         except Exception as e:
             st.error(f"Error executing valuation modules: {e}")
             p4_output = "⚠️ Valuation metrics framework execution error."
