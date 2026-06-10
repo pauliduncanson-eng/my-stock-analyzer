@@ -360,7 +360,7 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
-    p9_output = parse_panel(macro_analysis_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "### 📚 Consolidated Sources")
+    p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -387,10 +387,16 @@ if "active_ticker" in st.session_state:
     
     with st.spinner(f"🔢 Running valuation math specifically targeted to Phase {phase_num}..."):
         metrics_valuation_prompt = f"""
-        🚨 DATA SOURCE PROVENANCE ENFORCEMENT FILTER 🚨
-        - Your primary search queries MUST prioritize official financial nodes: "Company Investor Relations", "SEC EDGAR 10-K/10-Q", "Annual Report PDF", "Regulatory Filings", and "Earnings Call Transcript".
-        - For forward-looking indicators, revenue outlooks, or capacity targets, use EXCLUSIVELY official corporate guidance issued directly by management in official press releases or IR portals.
-        - STRICTLY FORBIDDEN: Do not ingest data, commentary, target figures, or assertions from third-party blogs, YouTube analysis videos, Substack opinion pieces, or retail forum channels (e.g., Reddit, Stocktwits). If official management guidance is unavailable for a metric, flag it as [Management Guidance Not Disclosed] instead of substituting speculative third-party targets.
+        🚨 DATA SOURCE PROVENANCE ENFORCEMENT FILTER v2.0 🚨
+        - MINIMUM SOURCE REQUIREMENT: Every panel MUST cite at least 3 distinct primary sources. If fewer than 3 exist, explicitly state "Limited Primary Disclosures Available" and explain impact on confidence.
+        - Your primary search queries MUST prioritise official financial nodes in this order:
+          1. "SEC EDGAR 10-K/10-Q/8-K" or European regulator equivalent or local regulator equivalent
+          2. "Company Investor Relations: Annual Report PDF, Proxy Statement, Financial Reports"
+          3. "Earnings Call Transcript" + "Official IR Presentation Deck"
+          4. "Company-compiled consensus estimates" or "Management guidance in Press Release"
+        - CITATION FORMAT: For each source, provide [Document Name, Fiscal Period, Section/Page]. Example: "FY2025 10-K, Item 7 MD&A, p.42"
+        - CROSS-VERIFICATION: For any forward metric, cite both the source document AND the specific guidance date. If guidance changed, note "Updated on [date]".
+        - STRICTLY FORBIDDEN: Third-party blogs, YouTube, Substack, Reddit, Seeking Alpha articles, or any aggregator commentary. If official management guidance is unavailable, flag as [Management Guidance Not Disclosed] and reduce confidence level accordingly.
 Replace with:
         CRITICAL OPERATIONAL INSTRUCTION: You are an expert financial analyst evaluating corporate fundamentals for target: '{ticker}' mapped against corporate lifecycle Phase: '{phase_num}'.
         Step 1: Use your Google Search tool to find today's current date and year (2026).
@@ -764,6 +770,7 @@ if "ticker_analyzed" in st.session_state:
             ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
             ("7.5 Total Shareholder Return (TSR) Driver Matrix", st.session_state["pdf_p7_5"]),
             ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
+            ("9. Sources Appendix", st.session_state["pdf_p9"]),
         ]
         
         for section_title, analytical_content in panels_to_print:
