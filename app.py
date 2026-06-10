@@ -591,63 +591,58 @@ Replace with:
         rule_justification = f"Fatal structural flaw: Shares Outstanding +{shares_dilution_pct}% YoY with FCF of {fcf_value}. Indicates equity raises funding cash burn, not growth."
 
     if phase_num == 1 or phase == "Startup":  # STARTUP PHASE RULES
-    import re
+        # Extract the key metrics from your panels first
+        import re  # ✅ Now indented 4 spaces
     
-    # --- EXTRACT FROM PANEL 3 OUTPUT ---
-    def extract_panel_field(text, field_name):
-        pattern = rf"### {re.escape(field_name)}:\s*([^\n]+)"
-        match = re.search(pattern, text)
-        return match.group(1).strip() if match else ""
+        def extract_metric(text, pattern, default=""):
+            match = re.search(pattern, text, re.IGNORECASE)
+            return match.group(1).strip() if match else default
     
-    future_growth_potential = extract_panel_field(p3_output, "Future Growth Potential")
-    future_growth_direction = extract_panel_field(p3_output, "Future Growth Direction")
+        # Adjust these patterns to match your Panel 5 output exactly
+        future_growth_potential = extract_metric(p5_output, r'Future Growth Potential:\s*(.+)')
+        future_growth_direction = extract_metric(p5_output, r'Future Growth Direction:\s*(.+)')
+        overall_financial_health = extract_metric(p5_output, r'Overall Financial Health:\s*(.+)')
+        moat_trend = extract_metric(p5_output, r'Moat Trend:\s*(.+)')
+        risk_rating = extract_metric(p5_output, r'Overall Risk Rating:\s*(.+)')
     
-    # These aren't in Panel 3 — you need to tell me where they are
-    # For now, we'll default them so code doesn't break
-    overall_financial_health = "Moderate"  # TODO: Extract from Panel 5 or 6
-    moat_trend = "Stable"                  # TODO: Extract from Panel 5
-    risk_rating = "Moderate"               # TODO: Extract from Panel 5 or 6
+        # RULE 1: Minimum bar for ADD TO WATCHLIST
+        watchlist_eligible = (
+            "High" in future_growth_potential and 
+            "Accelerating" in future_growth_direction and
+            any(x in overall_financial_health for x in ["Moderate", "Strong", "Excellent"])
+        )
     
-    # --- STARTUP RULES LOGIC ---
-    # RULE 1: Minimum bar for ADD TO WATCHLIST
-    watchlist_eligible = (
-        "High" in future_growth_potential and 
-        "Accelerating" in future_growth_direction and
-        ("Moderate" in overall_financial_health or "Strong" in overall_financial_health or "Excellent" in overall_financial_health)
-    )
+        # RULE 2: Additional requirements for DEEP DIVE ASAP
+        deep_dive_eligible = (
+            watchlist_eligible and
+            "Widening" in moat_trend and
+            any(x in risk_rating for x in ["Low", "Moderate"])
+        )
     
-    # RULE 2: Additional requirements for DEEP DIVE ASAP
-    deep_dive_eligible = (
-        watchlist_eligible and  # Must meet watchlist criteria first
-        "Widening" in moat_trend and
-        ("Low" in risk_rating or "Moderate" in risk_rating)
-    )
+        # APPLY THE RULES
+        if deep_dive_eligible:
+            calculated_status = "🚀 DEEP DIVE ASAP"
+            rule_reason = f"🟢 STARTUP DEEP DIVE: High + Accelerating Growth, {overall_financial_health} Financial Health, Widening Moat, {risk_rating} Risk."
     
-    # APPLY THE RULES
-    if deep_dive_eligible:
-        calculated_status = "🚀 DEEP DIVE ASAP"
-        rule_reason = f"🟢 STARTUP DEEP DIVE: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Financial Health, {moat_trend} Moat, {risk_rating} Risk. Meets all criteria."
+        elif watchlist_eligible:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            if "Widening" not in moat_trend:
+                rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {overall_financial_health} Health. BLOCKED: Moat is {moat_trend}, not Widening."
+            elif "High" in risk_rating:
+                rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {overall_financial_health} Health. BLOCKED: {risk_rating} Risk too high."
+            else:
+                rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {overall_financial_health} Health. Monitoring for moat expansion."
     
-    elif watchlist_eligible:
-        calculated_status = "⏳ ADD TO WATCHLIST"
-        if "Widening" not in moat_trend:
-            rule_reason = f"🟡 STARTUP WATCHLIST: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Health. BLOCKED from Deep Dive: Moat Trend is {moat_trend}, not Widening."
-        elif "High" in risk_rating:
-            rule_reason = f"🟡 STARTUP WATCHLIST: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Health. BLOCKED from Deep Dive: Risk is {risk_rating}."
         else:
-            rule_reason = f"🟡 STARTUP WATCHLIST: {future_growth_potential} + {future_growth_direction} Growth, {overall_financial_health} Health. Monitoring for moat expansion."
-    
-    else:
-        calculated_status = "❌ PASS (Too Risky)"
-        fail_reasons = []
-        if "High" not in future_growth_potential:
-            fail_reasons.append(f"Growth Potential: {future_growth_potential}")
-        if "Accelerating" not in future_growth_direction:
-            fail_reasons.append(f"Growth Direction: {future_growth_direction}")
-        if "Moderate" not in overall_financial_health and "Strong" not in overall_financial_health:
-            fail_reasons.append(f"Financial Health: {overall_financial_health}")
-        
-        rule_reason = f"🔴 STARTUP PASS: Failed criteria: {'; '.join(fail_reasons)}"
+            calculated_status = "❌ PASS (Too Risky)"
+            fail_reasons = []
+            if "High" not in future_growth_potential:
+                fail_reasons.append(f"Growth Potential: {future_growth_potential}")
+            if "Accelerating" not in future_growth_direction:
+                fail_reasons.append(f"Growth Direction: {future_growth_direction}")
+            if not any(x in overall_financial_health for x in ["Moderate", "Strong", "Excellent"]):
+                fail_reasons.append(f"Financial Health: {overall_financial_health}")
+            rule_reason = f"🔴 STARTUP PASS: Failed criteria: {'; '.join(fail_reasons)}"
         
     # PHASE 4: Mature compounder logic
     elif phase_num == "4":
