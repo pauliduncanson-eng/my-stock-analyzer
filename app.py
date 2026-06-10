@@ -360,7 +360,7 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
-    p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
+    
 
     col1, col2 = st.columns(2)
     with col1:
