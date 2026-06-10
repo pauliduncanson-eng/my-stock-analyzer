@@ -335,29 +335,7 @@ if "active_ticker" in st.session_state:
         === PANEL_6_END ===
         ---
 
-        === PANEL_9_START ===
-        # 📚 Consolidated Sources Appendix: {ticker}
-
-        OUTPUT_FORMAT: You must return ONLY a markdown list. No tables, no headers from other panels, no explanatory text.
-
-        ## Primary Filings Used
-        - Document: [Name], Period: [Q1 2026], Section: [Note 12, p.39], ID: [0001652044-26-000073]
-
-        ## Management Communications
-        - Type: [Earnings Call], Date: [2026-04-29], Reference: [Q1 2026 Prepared Remarks], URL: [https://...]
-
-        ## Consensus & Peer Data
-        - Provider: [S&P Capital IQ], Report: [Software Multiples], Date: [June 2026], Used_For: [EV/EBITDA median]
-
-        ## Data Gaps & Limitations
-        - [Metric]: [Management Guidance Not Disclosed], Impact: [Reduced confidence in NTM estimates]
-
-        VALIDATION_RULES:
-        1. If you output "===", "PANEL_", "📊", "💰", "🚀", or "⚠️" you have failed.
-        2. If you output more than 20 lines total, you have failed.
-        3. If you output any numbers not in a source citation, you have failed.
-        4. Only output the 4 sections above with bullet points starting with "- ".
-        === PANEL_9_END ===
+        
         """
         try:
             macro_analysis_output = generate_analysis_layer(ticker, macro_prompt)
@@ -369,7 +347,64 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
-    
+
+    import re
+from collections import OrderedDict
+
+def extract_citations_from_panels(*panel_texts):
+    """
+    Scans panels for citation patterns and returns clean, deduped source list
+    """
+    citations = OrderedDict() # Preserves order, removes dupes
+
+    # Patterns to catch: [1], [Form 10-Q...], [S&P Capital IQ...], URLs, accession numbers
+    patterns = [
+        r'\[(\d+)\]\s*\[([^\]]+)\]', # [1] [10-Q Q1 2026, p.3-39]
+        r'\[([^\]]*(?:10-[KQ]|20-F|8-K|Form)[^\]]*)\]', # [Form 10-Q, Q1 FY2027, p.3-12]
+        r'\[([^\]]*(?:Earnings Call|Investor Presentation|Press Release)[^\]]*)\]', # [Earnings Call Transcript, May 20 2026]
+        r'\[([^\]]*(?:S&P|Capital IQ|Morningstar|TIKR|Trefis|Macrotrends)[^\]]*)\]', # [S&P Capital IQ, June 2026]
+        r'(https?://[^\s\)]+)', # URLs
+        r'(\d{10}-\d{2}-\d{6})', # SEC accession numbers
+    ]
+
+    for text in panel_texts:
+        for pattern in patterns:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                if isinstance(match, tuple):
+                    # Handle grouped matches like [1] [10-Q...]
+                    citation = f"[{match[0]}] {match[1]}" if match[0].isdigit() else match[1]
+                else:
+                    citation = match
+
+                # Clean and normalize
+                citation = citation.strip()
+                if len(citation) > 10: # Skip tiny fragments
+                    citations[citation] = True
+
+    return list(citations.keys())
+
+# After parsing p4_output, p7_output, p7_5_output:
+p9_output = "## 📚 Consolidated Sources & Citations\n\n"
+
+raw_citations = extract_citations_from_panels(p4_output, p7_output, p7_5_output, p8_output)
+
+if raw_citations:
+    p9_output += "### Sources Referenced in Analysis\n"
+    for i, cite in enumerate(raw_citations, 1):
+        p9_output += f"- {cite}\n"
+else:
+    p9_output += "⚠️ No explicit citations found in analysis panels. Verify data sources manually.\n"
+
+p9_output += "\n### Data Gaps & Limitations\n"
+# Scan for [Management Guidance Not Disclosed] or similar
+gaps = re.findall(r'\[([^\]]*(?:Not Disclosed|Not Provided|Unavailable)[^\]]*)\]',
+                  p4_output + p7_output + p7_5_output)
+if gaps:
+    for gap in set(gaps):
+        p9_output += f"- {gap}\n"
+else:
+    p9_output += "- No material data gaps flagged in analysis.\n"
 
     col1, col2 = st.columns(2)
     with col1:
