@@ -35,7 +35,7 @@ if not st.session_state.password_correct:
                 st.warning("Please enter a password.")
             else:
                 st.error("❌ Incorrect password. Access Denied.")
-    st.stop()
+                st.stop()
 
 # 2. Securely Initialize Gemini Client
 if "GEMINI_API_KEY" not in st.secrets:
