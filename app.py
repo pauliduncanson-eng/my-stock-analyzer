@@ -333,6 +333,22 @@ if "active_ticker" in st.session_state:
         ## 📎 Sources
         - [Identify specific Consolidated Financial Statements, Balance Sheet, or Cash Flow footnotes from the primary official filing used]
         === PANEL_6_END ===
+        ---
+
+        === PANEL_9_START ===
+        # 📚 Consolidated Sources Appendix: {ticker}
+        ## Primary Filings Used
+        [List all 10-K, 10-Q, 20-F, Annual Reports accessed with fiscal year and direct URL or EDGAR accession number]
+
+        ## Management Communications
+        [List Earnings Call Dates, IR Day Presentations, Press Releases with dates and URL]
+
+        ## Consensus & Peer Data
+        [List any consensus source, sector reports, or peer filings used for benchmarking]
+
+        ## Data Gaps & Limitations
+        [Explicitly state any metric marked [Management Guidance Not Disclosed] and impact on analysis confidence]
+        === PANEL_9_END ===
         """
         try:
             macro_analysis_output = generate_analysis_layer(ticker, macro_prompt)
@@ -344,6 +360,7 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
+    p9_output = parse_panel(macro_analysis_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "### 📚 Consolidated Sources")
 
     col1, col2 = st.columns(2)
     with col1:
