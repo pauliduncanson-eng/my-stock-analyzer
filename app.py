@@ -360,7 +360,7 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
-    p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
+    
 
     col1, col2 = st.columns(2)
     with col1:
@@ -459,12 +459,13 @@ Replace with:
             p4_output = parse_panel(macro_val_output, "=== PANEL_4_START ===", "=== PANEL_4_END ===", "### 📊 Phase")
             p7_output = parse_panel(macro_val_output, "=== PANEL_7_START ===", "=== PANEL_7_END ===", "### 💰 Phase-Appropriate")
             p7_5_output = parse_panel(macro_val_output, "=== PANEL_7_5_START ===", "=== PANEL_7_5_END ===", "### 📊 Total Shareholder Return")
-            p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")  # <-- ADD THIS
+            p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
         except Exception as e:
             st.error(f"Error executing valuation modules: {e}")
             p4_output = "⚠️ Valuation metrics framework execution error."
             p7_output = "⚠️ Valuation calculation framework execution error."
             p7_5_output = "⚠️ TSR Matrix compilation unavailable."
+            p9_output = "⚠️ Sources Appendix unavailable."
 
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
         st.markdown(p4_output)
@@ -475,7 +476,10 @@ Replace with:
     with st.expander("📊 Total Shareholder Return (TSR) Driver Card", expanded=True):
         st.markdown(p7_5_output)
         
-        # ==================================================================
+    with st.expander("📚 Sources & Citations Appendix", expanded=False):
+        st.markdown(p9_output)
+        
+    # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (NUANCED DILUTION LOGIC)
     # ==================================================================
     
@@ -720,6 +724,7 @@ Replace with:
     st.session_state["pdf_p7"] = p7_output
     st.session_state["pdf_p7_5"] = p7_5_output  
     st.session_state["pdf_p8"] = p8_output
+    st.session_state["pdf_p9"] = p9_output  
 
 # ==================================================================
 # 📥 EXPORT ENGINE BLOCK
@@ -762,17 +767,17 @@ if "ticker_analyzed" in st.session_state:
         pdf.ln(10)
         
         panels_to_print = [
-            ("1. Business Phase Analysis", st.session_state["pdf_p1"]),
-            ("2. Competitive Moat Analysis", st.session_state["pdf_p2"]),
-            ("3. Future Growth Analysis", st.session_state["pdf_p3"]),
-            ("4. Core Diagnostic Benchmarking", st.session_state["pdf_p4"]),
-            ("5. Execution Risk Analysis", st.session_state["pdf_p5"]),
-            ("6. Financial Health Analysis", st.session_state["pdf_p6"]),
-            ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
-            ("7.5 Total Shareholder Return (TSR) Driver Matrix", st.session_state["pdf_p7_5"]),
-            ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
-            ("9. Sources Appendix", st.session_state["pdf_p9"]),
-        ]
+        ("1. Business Phase Analysis", st.session_state["pdf_p1"]),
+        ("2. Competitive Moat Analysis", st.session_state["pdf_p2"]),
+        ("3. Future Growth Analysis", st.session_state["pdf_p3"]),
+        ("4. Core Diagnostic Benchmarking", st.session_state["pdf_p4"]),
+        ("5. Execution Risk Analysis", st.session_state["pdf_p5"]),
+        ("6. Financial Health Analysis", st.session_state["pdf_p6"]),
+        ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
+        ("7.5 Total Shareholder Return (TSR) Driver Matrix", st.session_state["pdf_p7_5"]),
+        ("9. Consolidated Sources Appendix", st.session_state["pdf_p9"]),  
+        ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
+]
         
         for section_title, analytical_content in panels_to_print:
             pdf.set_font("Helvetica", "B", 12)
