@@ -10,7 +10,7 @@ from fpdf import FPDF
 st.set_page_config(page_title="European Hidden Gems Analyzer", layout="wide")
 st.title("📊 European Hidden Gems Research Dashboard")
 st.subheader("30-Second Analysis: Instantly determine if this business is a Pass, Add to Watchlist, or Deep Dive Asap.")
-st.caption("version 1.2") 
+st.caption("version 1.2")
 
 # ==================================================================
 # 🔒 PASSWORD PROTECTION GATEWAY (INLINE STABLE VERSION)
@@ -360,7 +360,7 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
-    
+    p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -459,13 +459,12 @@ Replace with:
             p4_output = parse_panel(macro_val_output, "=== PANEL_4_START ===", "=== PANEL_4_END ===", "### 📊 Phase")
             p7_output = parse_panel(macro_val_output, "=== PANEL_7_START ===", "=== PANEL_7_END ===", "### 💰 Phase-Appropriate")
             p7_5_output = parse_panel(macro_val_output, "=== PANEL_7_5_START ===", "=== PANEL_7_5_END ===", "### 📊 Total Shareholder Return")
-            p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
+            p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")  # <-- ADD THIS
         except Exception as e:
             st.error(f"Error executing valuation modules: {e}")
             p4_output = "⚠️ Valuation metrics framework execution error."
             p7_output = "⚠️ Valuation calculation framework execution error."
             p7_5_output = "⚠️ TSR Matrix compilation unavailable."
-            p9_output = "⚠️ Sources Appendix unavailable."
 
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
         st.markdown(p4_output)
