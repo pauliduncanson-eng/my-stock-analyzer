@@ -49,7 +49,7 @@ def get_gemini_client():
 client = get_gemini_client()
 
 # 3. Optimized API Call Wrapper
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=3600) # ttl=3600 caches the result for 1 hour
 def generate_analysis_layer(ticker, prompt_text):
     config = types.GenerateContentConfig(
         tools=[{"google_search": {}}],
@@ -157,18 +157,21 @@ if submit_button and ticker_input:
         if key in st.session_state: del st.session_state[key]
     st.rerun() # Force a rerun to enter the block below
 
-# 2. Only execute the expensive API calls if we have an active ticker 
-# AND the user has just submitted (or data is loaded in state)
+# 2. Only execute the expensive API calls if we have an active ticker
 if "active_ticker" in st.session_state:
     ticker = st.session_state["active_ticker"]
     
-    # Check if we already have data loaded, if not, perform the calls
+    # GATING: Each panel checks its own state before calling the API
     if "pdf_p1" not in st.session_state:
-        st.info(f"Analyzing {ticker}...")
-        
-        # --- PASTE YOUR BATCH 1, 2, AND 3 API CALLS HERE ---
-        # (This keeps the code clean and only runs once per button click)
-        # ... (rest of your logic) ...
+        with st.spinner("Analyzing Phase..."):
+            st.session_state["pdf_p1"] = generate_analysis_layer(ticker, p1_prompt)
+    
+    # Always display once data is present
+    if "pdf_p1" in st.session_state:
+        with st.expander("🧭 Business Phase Analysis", expanded=True):
+            st.markdown(st.session_state["pdf_p1"])
+            
+    
     # ==================================================================
     # 🧭 BATCH 1: Business Phase Analysis (EXACT ORIGINAL)
     # ==================================================================
