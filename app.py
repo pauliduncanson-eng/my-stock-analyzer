@@ -158,25 +158,10 @@ if submit_button and ticker_input:
     st.rerun() # Force a rerun to enter the block below
 
 # 2. Only execute the expensive API calls if we have an active ticker
-if "active_ticker" in st.session_state:
-    ticker = st.session_state["active_ticker"]
-    
-    # GATING: Each panel checks its own state before calling the API
-    if "pdf_p1" not in st.session_state:
-        with st.spinner("Analyzing Phase..."):
-            st.session_state["pdf_p1"] = generate_analysis_layer(ticker, p1_prompt)
-    
-    # Always display once data is present
-    if "pdf_p1" in st.session_state:
-        with st.expander("🧭 Business Phase Analysis", expanded=True):
-            st.markdown(st.session_state["pdf_p1"])
-            
-    
-    # ==================================================================
-    # 🧭 BATCH 1: Business Phase Analysis (EXACT ORIGINAL)
-    # ==================================================================
-    phase_output = ""
-    with st.expander("🧭 Business Phase Analysis", expanded=True):
+    if "active_ticker" in st.session_state:
+        ticker = st.session_state["active_ticker"]
+        
+        # --- DEFINE THE PROMPT HERE BEFORE USING IT ---
         p1_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are a World-Class Strategic Analyst specialising in Business Lifecycle and Phase Identification. Your target stock identifier/company name is: '{ticker}'. 
         Step 1: Use your Google Search tool to identify today's current date and year (2026).
@@ -201,6 +186,11 @@ if "active_ticker" in st.session_state:
         ## 🔗 Sources Used
         [1] [Exact name of core primary SEC filing or international IR report used]
         """
+        
+        # --- NOW CALL THE API ---
+        if "pdf_p1" not in st.session_state:
+            with st.spinner("Analyzing Phase..."):
+                st.session_state["pdf_p1"] = generate_analysis_layer(ticker, p1_prompt)
         try:
             phase_output = generate_analysis_layer(ticker, p1_prompt)
             st.markdown(phase_output)
