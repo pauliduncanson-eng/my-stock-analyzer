@@ -49,7 +49,7 @@ def get_gemini_client():
 client = get_gemini_client()
 
 # 3. Optimized API Call Wrapper
-@st.cache_data(show_spinner=False, ttl=3600) # ttl=3600 caches the result for 1 hour
+@st.cache_data(show_spinner=False)
 def generate_analysis_layer(ticker, prompt_text):
     config = types.GenerateContentConfig(
         tools=[{"google_search": {}}],
@@ -149,19 +149,16 @@ with st.form(key="research_panel_form"):
 if submit_button and ticker_input:
     st.session_state["active_ticker"] = ticker_input
 
-# 1. Update the form submission logic to TRIGGER the analysis
-if submit_button and ticker_input:
-    st.session_state["active_ticker"] = ticker_input
-    # Clear old data so we don't accidentally display previous results
-    for key in ["pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p7_5", "pdf_p8", "pdf_p9"]:
-        if key in st.session_state: del st.session_state[key]
-    st.rerun() # Force a rerun to enter the block below
+# Run the evaluation if an active ticker is captured in state
+if "active_ticker" in st.session_state:
+    ticker = st.session_state["active_ticker"]
+    st.info(f"Analyzing {ticker}... Sourcing verified data.")
 
-# 2. Only execute the expensive API calls if we have an active ticker
-    if "active_ticker" in st.session_state:
-        ticker = st.session_state["active_ticker"]
-        
-        # --- DEFINE THE PROMPT HERE BEFORE USING IT ---
+    # ==================================================================
+    # 🧭 BATCH 1: Business Phase Analysis (EXACT ORIGINAL)
+    # ==================================================================
+    phase_output = ""
+    with st.expander("🧭 Business Phase Analysis", expanded=True):
         p1_prompt = f"""
         CRITICAL OPERATIONAL INSTRUCTION: You are a World-Class Strategic Analyst specialising in Business Lifecycle and Phase Identification. Your target stock identifier/company name is: '{ticker}'. 
         Step 1: Use your Google Search tool to identify today's current date and year (2026).
@@ -186,11 +183,6 @@ if submit_button and ticker_input:
         ## 🔗 Sources Used
         [1] [Exact name of core primary SEC filing or international IR report used]
         """
-        
-        # --- NOW CALL THE API ---
-        if "pdf_p1" not in st.session_state:
-            with st.spinner("Analyzing Phase..."):
-                st.session_state["pdf_p1"] = generate_analysis_layer(ticker, p1_prompt)
         try:
             phase_output = generate_analysis_layer(ticker, p1_prompt)
             st.markdown(phase_output)
@@ -576,60 +568,40 @@ Replace with:
         calculated_status = "❌ PASS (Not Good Enough)"
         rule_justification = "Company is structurally limited by its business life cycle phase (Phase 5 - Declining profile filtered by core framework rules)."
 
-    if phase_num == "1":  # STARTUP PHASE RULES - REWRITTEN
-        import re
+    # PHASE 1-3: Check if nuanced dilution passed first
+    elif phase_num in ["1", "2", "3"] and alignment_color == "🟢":
+        calculated_status = "🚀 DEEP DIVE ASAP"
+        rule_justification = rule_justification_override + f"Phase {phase_num} Hyper-Conviction Growth Engine with strategic capital deployment."
     
-        # --- PARSE EXISTING PANEL 5 TEXT - NO PROMPT CHANGES ---
-        def get_p5(field):
-            match = re.search(rf'{field}:\s*([^\n\r]+)', p5_output, re.IGNORECASE)
-            return match.group(1).strip() if match else "Not Found"
-    
-        growth_potential = get_p5("Future Growth Potential")
-        growth_direction = get_p5("Future Growth Direction")
-        financial_health = get_p5("Overall Financial Health")
-        moat_trend = get_p5("Moat Trend")
-        risk_rating = get_p5("Overall Risk Rating")
-    
-        # --- TIER 1: HARD PASS - Auto-reject conditions ---
-        if "High" in risk_rating:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_reason = f"🔴 STARTUP PASS: High Risk Rating detected. Startups with High Risk fail watchlist criteria regardless of growth. Health: {financial_health}, Risk: {risk_rating}"
-    
-        elif "Weak" in financial_health or "Distressed" in financial_health:
-            calculated_status = "❌ PASS (Too Risky)"
-            rule_reason = f"🔴 STARTUP PASS: Financial Health too weak: {financial_health}. Insufficient runway for execution."
-    
-        # --- TIER 2: WATCHLIST - Minimum viable startup ---
-        elif (
-            "High" in growth_potential and
-            "Accelerating" in growth_direction and
-            any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]) and
-            ("Low" in risk_rating or "Moderate" in risk_rating)
-        ):
-            # --- TIER 3: DEEP DIVE - Check for moat ---
-            if "Widening" in moat_trend:
-                calculated_status = "🚀 DEEP DIVE ASAP"
-                rule_reason = f"🟢 STARTUP DEEP DIVE: High + Accelerating Growth, {financial_health} Health, Widening Moat, {risk_rating} Risk. Meets all criteria for immediate action."
-            else:
-                calculated_status = "⏳ ADD TO WATCHLIST"
-                rule_reason = f"🟡 STARTUP WATCHLIST: High + Accelerating Growth, {financial_health} Health, {risk_rating} Risk. BLOCKED from Deep Dive: Moat Trend is '{moat_trend}', not Widening."
-    
-        # --- TIER 4: DEFAULT PASS ---
+    elif phase_num == "1" and alignment_color == "🟡":
+        calculated_status = "⏳ ADD TO WATCHLIST"
+        rule_justification = rule_justification_override + "Phase 1 profile with high growth but dilution requires monitoring of capital efficiency."
+
+    elif phase_num in ["2", "3"] and alignment_color == "🟡":
+        if p4_red_count <= 1:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = rule_justification_override + f"Solid Phase {phase_num} Growth profile. Dilution is a watch item but core metrics acceptable."
         else:
-            fail_list = []
-            if "High" not in growth_potential: fail_list.append(f"Growth Potential: {growth_potential}")
-            if "Accelerating" not in growth_direction: fail_list.append(f"Growth Direction: {growth_direction}")
-            if not any(x in financial_health for x in ["Moderate", "Strong", "Excellent"]): 
-                fail_list.append(f"Financial Health: {financial_health}")
-        
-            calculated_status = "❌ PASS (Not Good Enough)"
-            rule_reason = f"🔴 STARTUP PASS: Failed watchlist criteria: {'; '.join(fail_list)}"
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_justification = rule_justification_override + f"Phase {phase_num} Growth with excessive operating friction despite dilution controls."
 
     # GLOBAL FATAL DILUTION CHECK: Only fires if not caught by nuanced rules above
     elif alignment_color == "🔴":
         calculated_status = "❌ PASS (Too Risky)"
         rule_justification = f"Fatal structural flaw: Shares Outstanding +{shares_dilution_pct}% YoY with FCF of {fcf_value}. Indicates equity raises funding cash burn, not growth."
-        
+
+    # PHASE 1: Standard startup filter
+    elif phase_num == "1":
+        if p4_red_count > 0:
+            calculated_status = "❌ PASS (Too Risky)"
+            rule_justification = "Phase 1 Startup disqualified due to active high-risk red flags in core operational performance metrics."
+        elif alignment_color == "🟢" and p4_green_count >= 3:
+            calculated_status = "⏳ ADD TO WATCHLIST"
+            rule_justification = "High-quality Phase 1 startup profile meeting strict baseline structural indicators."
+        else:
+            calculated_status = "❌ PASS (Not Good Enough)"
+            rule_justification = "Phase 1 Startup filtered out. Fails to meet the strict multi-criteria financial efficiency thresholds."
+
     # PHASE 4: Mature compounder logic
     elif phase_num == "4":
         if rev_growth_color == "🔴" or val_overvalued:
@@ -662,13 +634,13 @@ Replace with:
         rule_justification = "System fallback logic triggered. Deflected to pipeline queue for structural manual verification."
 
     # ==================================================================
-    # 🧠 PANEL #8: DATA SYNTHESIS (WITH DATA RULES)
+    # 🧠 PANEL #8: CHIEF INVESTMENT OFFICER SYNTHESIS (WITH DATA RULES)
     # ==================================================================
     with st.expander("⚖ Panel #8: Final Investment Decision", expanded=True):
         st.write("*Synthesizing framework layers into a final allocation recommendation...*")
         
         p8_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialise the data gathered across our research framework for the target asset: '{ticker}' (Phase Context: Phase {phase_num}).
+        CRITICAL OPERATIONAL INSTRUCTION: You are the Chief Investment Officer of a boutique equity fund specialising in microeconomic moats and structural corporate lifecycles. Your job is to specialize the data gathered across our research framework for target asset: '{ticker}' (Phase Context: Phase {phase_num}).
 
         The rules-based engine has already run a structural compliance check on this asset and determined the following mandatory designation:
          
