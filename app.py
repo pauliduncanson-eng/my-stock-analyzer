@@ -149,11 +149,26 @@ with st.form(key="research_panel_form"):
 if submit_button and ticker_input:
     st.session_state["active_ticker"] = ticker_input
 
-# Run the evaluation if an active ticker is captured in state
+# 1. Update the form submission logic to TRIGGER the analysis
+if submit_button and ticker_input:
+    st.session_state["active_ticker"] = ticker_input
+    # Clear old data so we don't accidentally display previous results
+    for key in ["pdf_p1", "pdf_p2", "pdf_p3", "pdf_p4", "pdf_p5", "pdf_p6", "pdf_p7", "pdf_p7_5", "pdf_p8", "pdf_p9"]:
+        if key in st.session_state: del st.session_state[key]
+    st.rerun() # Force a rerun to enter the block below
+
+# 2. Only execute the expensive API calls if we have an active ticker 
+# AND the user has just submitted (or data is loaded in state)
 if "active_ticker" in st.session_state:
     ticker = st.session_state["active_ticker"]
-    st.info(f"Analyzing {ticker}... Sourcing verified data.")
-
+    
+    # Check if we already have data loaded, if not, perform the calls
+    if "pdf_p1" not in st.session_state:
+        st.info(f"Analyzing {ticker}...")
+        
+        # --- PASTE YOUR BATCH 1, 2, AND 3 API CALLS HERE ---
+        # (This keeps the code clean and only runs once per button click)
+        # ... (rest of your logic) ...
     # ==================================================================
     # 🧭 BATCH 1: Business Phase Analysis (EXACT ORIGINAL)
     # ==================================================================
