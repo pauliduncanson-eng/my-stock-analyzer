@@ -35,7 +35,7 @@ if not st.session_state.password_correct:
                 st.warning("Please enter a password.")
             else:
                 st.error("❌ Incorrect password. Access Denied.")
-                st.stop()
+    st.stop()
 
 # 2. Securely Initialize Gemini Client
 if "GEMINI_API_KEY" not in st.secrets:
@@ -199,7 +199,7 @@ if "active_ticker" in st.session_state:
     macro_analysis_output = ""
     with st.spinner("⚡ Running Deep-Search Core Analysis Engine (Processing Moats, Growth, Risks, and Statements)..."):
         macro_prompt = f"""
-        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine specialising in microeconomic moats and fundamental analysis. Your target stock identifier/company name is: '{ticker}'.
+        CRITICAL OPERATIONAL INSTRUCTION: You are an elite hedge fund research engine specializing in microeconomic moats and fundamental analysis. Your target stock identifier/company name is: '{ticker}'.
         
         Step 1: Use your Google Search tool to find today's current date and year (2026).
         Step 2: Search SEC EDGAR, official Company Investor Relations pages, and recent financial filings to locate the most recent 10-K, 10-Q, or international Annual Reports for target '{ticker}'.
@@ -335,7 +335,20 @@ if "active_ticker" in st.session_state:
         === PANEL_6_END ===
         ---
 
-        
+        === PANEL_9_START ===
+        # 📚 Consolidated Sources Appendix: {ticker}
+        ## Primary Filings Used
+        [List all 10-K, 10-Q, 20-F, Annual Reports accessed with fiscal year and direct URL or EDGAR accession number]
+
+        ## Management Communications
+        [List Earnings Call Dates, IR Day Presentations, Press Releases with dates and URL]
+
+        ## Consensus & Peer Data
+        [List any consensus source, sector reports, or peer filings used for benchmarking]
+
+        ## Data Gaps & Limitations
+        [Explicitly state any metric marked [Management Guidance Not Disclosed] and impact on analysis confidence]
+        === PANEL_9_END ===
         """
         try:
             macro_analysis_output = generate_analysis_layer(ticker, macro_prompt)
@@ -347,44 +360,7 @@ if "active_ticker" in st.session_state:
     p3_output = parse_panel(macro_analysis_output, "=== PANEL_3_START ===", "=== PANEL_3_END ===", "# 🚀 Future Growth Analysis")
     p5_output = parse_panel(macro_analysis_output, "=== PANEL_5_START ===", "=== PANEL_5_END ===", "# ⚠️ Execution Risk Analysis")
     p6_output = parse_panel(macro_analysis_output, "=== PANEL_6_START ===", "=== PANEL_6_END ===", "# 📊 Financial Health Analysis")
-
-    import re
-from collections import OrderedDict
-
-def extract_citations_from_panels(*panel_texts):
-    """
-    Scans panels for citation patterns and returns clean, deduped source list
-    """
-    citations = OrderedDict() # Preserves order, removes dupes
-
-    # Patterns to catch: [1], [Form 10-Q...], [S&P Capital IQ...], URLs, accession numbers
-    patterns = [
-        r'\[(\d+)\]\s*\[([^\]]+)\]', # [1] [10-Q Q1 2026, p.3-39]
-        r'\[([^\]]*(?:10-[KQ]|20-F|8-K|Form)[^\]]*)\]', # [Form 10-Q, Q1 FY2027, p.3-12]
-        r'\[([^\]]*(?:Earnings Call|Investor Presentation|Press Release)[^\]]*)\]', # [Earnings Call Transcript, May 20 2026]
-        r'\[([^\]]*(?:S&P|Capital IQ|Morningstar|TIKR|Trefis|Macrotrends)[^\]]*)\]', # [S&P Capital IQ, June 2026]
-        r'(https?://[^\s\)]+)', # URLs
-        r'(\d{10}-\d{2}-\d{6})', # SEC accession numbers
-    ]
-
-    for text in panel_texts:
-        for pattern in patterns:
-            matches = re.findall(pattern, text, re.IGNORECASE)
-            for match in matches:
-                if isinstance(match, tuple):
-                    # Handle grouped matches like [1] [10-Q...]
-                    citation = f"[{match[0]}] {match[1]}" if match[0].isdigit() else match[1]
-                else:
-                    citation = match
-
-                # Clean and normalize
-                citation = citation.strip()
-                if len(citation) > 10: # Skip tiny fragments
-                    citations[citation] = True
-
-    return list(citations.keys())
-
-# After parsing p4_output, p7_output, p7_5_output:
+    p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -483,59 +459,13 @@ Replace with:
             p4_output = parse_panel(macro_val_output, "=== PANEL_4_START ===", "=== PANEL_4_END ===", "### 📊 Phase")
             p7_output = parse_panel(macro_val_output, "=== PANEL_7_START ===", "=== PANEL_7_END ===", "### 💰 Phase-Appropriate")
             p7_5_output = parse_panel(macro_val_output, "=== PANEL_7_5_START ===", "=== PANEL_7_5_END ===", "### 📊 Total Shareholder Return")
+            p9_output = parse_panel(macro_val_output, "=== PANEL_9_START ===", "=== PANEL_9_END ===", "# 📚 Consolidated Sources")  # <-- ADD THIS
         except Exception as e:
             st.error(f"Error executing valuation modules: {e}")
             p4_output = "⚠️ Valuation metrics framework execution error."
             p7_output = "⚠️ Valuation calculation framework execution error."
             p7_5_output = "⚠️ TSR Matrix compilation unavailable."
-        # --- AUTO-GENERATE SOURCES APPENDIX ---
-        import re
-        from collections import OrderedDict
 
-        def extract_citations_from_panels(*panel_texts):
-            citations = OrderedDict()
-            patterns = [
-                r'\[(\d+)\]\s*\[([^\]]+)\]',
-                r'\[([^\]]*(?:10-[KQ]|20-F|8-K|Form)[^\]]*)\]',
-                r'\[([^\]]*(?:Earnings Call|Investor Presentation|Press Release)[^\]]*)\]',
-                r'\[([^\]]*(?:S&P|Capital IQ|Morningstar|TIKR|Trefis|Macrotrends)[^\]]*)\]',
-                r'(https?://[^\s\)]+)',
-                r'(\d{10}-\d{2}-\d{6})',
-            ]
-            for text in panel_texts:
-                if not text:
-                    continue
-                for pattern in patterns:
-                    matches = re.findall(pattern, text, re.IGNORECASE)
-                    for match in matches:
-                        if isinstance(match, tuple):
-                            citation = f"[{match[0]}] {match[1]}" if match[0].isdigit() else match[1]
-                        else:
-                            citation = match
-                        citation = citation.strip()
-                        if len(citation) > 10:
-                            citations[citation] = True
-            return list(citations.keys())
-
-        # p4_output, p7_output, p7_5_output now exist, so this is safe
-        raw_citations = extract_citations_from_panels(p4_output, p7_output, p7_5_output)
-
-        p9_output = "## 📚 Consolidated Sources & Citations\n\n"
-        if raw_citations:
-            p9_output += "### Sources Referenced in Analysis\n"
-            for cite in raw_citations:
-                p9_output += f"- {cite}\n"
-        else:
-            p9_output += "⚠️ No explicit citations found in analysis panels.\n"
-
-        p9_output += "\n### Data Gaps & Limitations\n"
-        gaps = re.findall(r'\[([^\]]*(?:Not Disclosed|Not Provided|Unavailable)[^\]]*)\]',
-                          p4_output + p7_output + p7_5_output)
-        if gaps:
-            for gap in set(gaps):
-                p9_output += f"- {gap}\n"
-        else:
-            p9_output += "- No material data gaps flagged in analysis.\n"
     with st.expander("📊 Business Key Metrics Analysis", expanded=True):
         st.markdown(p4_output)
 
@@ -545,10 +475,7 @@ Replace with:
     with st.expander("📊 Total Shareholder Return (TSR) Driver Card", expanded=True):
         st.markdown(p7_5_output)
         
-    with st.expander("📚 Sources & Citations Appendix", expanded=False):
-       st.markdown(p9_output)
-        
-    # ==================================================================
+        # ==================================================================
     # 🧠 PANEL #8: SYSTEM SYNTHESIS & SCORING ENGINE (NUANCED DILUTION LOGIC)
     # ==================================================================
     
@@ -793,7 +720,6 @@ Replace with:
     st.session_state["pdf_p7"] = p7_output
     st.session_state["pdf_p7_5"] = p7_5_output  
     st.session_state["pdf_p8"] = p8_output
-    st.session_state["pdf_p9"] = p9_output  
 
 # ==================================================================
 # 📥 EXPORT ENGINE BLOCK
@@ -836,17 +762,17 @@ if "ticker_analyzed" in st.session_state:
         pdf.ln(10)
         
         panels_to_print = [
-        ("1. Business Phase Analysis", st.session_state["pdf_p1"]),
-        ("2. Competitive Moat Analysis", st.session_state["pdf_p2"]),
-        ("3. Future Growth Analysis", st.session_state["pdf_p3"]),
-        ("4. Core Diagnostic Benchmarking", st.session_state["pdf_p4"]),
-        ("5. Execution Risk Analysis", st.session_state["pdf_p5"]),
-        ("6. Financial Health Analysis", st.session_state["pdf_p6"]),
-        ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
-        ("7.5 Total Shareholder Return (TSR) Driver Matrix", st.session_state["pdf_p7_5"]),
-        ("9. Consolidated Sources Appendix", st.session_state["pdf_p9"]),  
-        ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
-]
+            ("1. Business Phase Analysis", st.session_state["pdf_p1"]),
+            ("2. Competitive Moat Analysis", st.session_state["pdf_p2"]),
+            ("3. Future Growth Analysis", st.session_state["pdf_p3"]),
+            ("4. Core Diagnostic Benchmarking", st.session_state["pdf_p4"]),
+            ("5. Execution Risk Analysis", st.session_state["pdf_p5"]),
+            ("6. Financial Health Analysis", st.session_state["pdf_p6"]),
+            ("7. Valuation Matrix & Targets", st.session_state["pdf_p7"]),
+            ("7.5 Total Shareholder Return (TSR) Driver Matrix", st.session_state["pdf_p7_5"]),
+            ("8. Final Investment Decision Summary", st.session_state["pdf_p8"])
+            ("9. Sources Appendix", st.session_state["pdf_p9"]),
+        ]
         
         for section_title, analytical_content in panels_to_print:
             pdf.set_font("Helvetica", "B", 12)
