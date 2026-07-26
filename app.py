@@ -704,9 +704,9 @@ Replace with:
             </h2>
         </div>
 
-        **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
+        **SUMMARY:** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
-        ### 📋 Investment Committee Thesis
+        ### 📋 Investment Thesis
 
         - **Core Investment Thesis:**
 
