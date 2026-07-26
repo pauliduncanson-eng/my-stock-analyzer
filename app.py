@@ -647,10 +647,41 @@ Replace with:
         MANDATORY DESIGNATION: {calculated_status}
         SYSTEM REASONING: {rule_justification}
 
-        You MUST accept this designation. Your role is to write the executive synthesis explaining the qualitative 'Why' behind this decision, utilizing the findings from our individual modules.
+        You MUST accept this designation.
 
-        CRITICAL ROUTING INSTRUCTIONS FOR INSIGHT GENERATION:
-        Depending on the MANDATORY DESIGNATION provided above, adapt your breakdown inside the sections below using these parameters:
+        Your role is to explain the long-term investment case for the underlying business that supports this recommendation.
+
+        Focus on the company's products, services, competitive advantages, customers, market opportunity and expected business evolution over the next five years.
+
+        Do not explain the mechanics of the scoring engine.
+
+        CRITICAL ROUTING INSTRUCTIONS FOR INSIGHT GENERATION
+
+        The recommendation has already been determined by the rules engine.
+
+        Your job is NOT to explain how the scoring engine reached its conclusion.
+
+        Your job is to explain why the underlying BUSINESS could create (or destroy) shareholder value over the next five years.
+    
+        Build your investment thesis around the company's business model, products, services, customers and long-term competitive position.
+
+        Specifically explain:
+
+        • What products or services will drive future growth?
+
+        • Why customers are likely to continue buying them.
+
+        • What structural competitive advantages make those products difficult to replicate.
+
+        • Which long-term trends support or threaten demand.
+
+        • Why those factors are expected to drive (or fail to drive) future revenue, earnings and free cash flow.
+
+        Use the recommendation from the rules engine only as the final conclusion.
+
+        Do NOT spend significant time discussing dilution, capital raises, shareholder alignment, financing, or other balance sheet mechanics unless they are genuinely the single biggest reason the investment case succeeds or fails.
+
+        The assessment should read like a five-year investment thesis for the business itself, not an explanation of the scoring framework.
 
         1. If the status is "🚀 DEEP DIVE ASAP":
            - **Core Investment Thesis:** Explain why this business deserves immediate deeper research by combining the strongest evidence from the Business Phase, Competitive Moat, Future Growth, Financial Health, Valuation and TSR Driver analyses. Focus on the structural characteristics that make this an exceptional long-term compounder or mispriced opportunity. Do not simply repeat metrics—explain why they matter.
