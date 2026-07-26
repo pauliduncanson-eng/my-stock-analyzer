@@ -654,7 +654,7 @@ Replace with:
 
         1. If the status is "🚀 DEEP DIVE ASAP":
            - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity. If dilution was present but offset by growth/capex/guidance, explicitly frame the equity raise as a positive, strategic capital deployment mechanism required to fund a generational land grab. You must cite the specific Revenue Growth % and Shares Outstanding % from the data. Highlight why topline hyper-velocity trumps standard capital dilution guidelines.
-           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear (e.g., infrastructure execution risk, capacity utilization delays, guidance credibility).
+           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear (e.g., infrastructure execution risk, capacity utilisation delays, guidance credibility).
 
         2. If the status is "⏳ ADD TO WATCHLIST":
            - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. If dilution is the reason, cite the specific Shares Outstanding % vs FCF number. Focus on scale confirmation, validation of unit economics, or near-term margins adjustments.
@@ -676,8 +676,8 @@ Replace with:
         **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
         ### 📋 Core Investment Thesis & Risks
-        - **Core Investment Thesis:** [Provide a detailed 2-3 sentence strategic rationale customized to the designation parameters specified above. Must include hard numbers if dilution is discussed.]
-        - **Key Risks to Identify:** [Provide a detailed 2-3 sentence breakdown customized to the designation parameters specified above.]
+        - **Core Investment Thesis:** [Provide a detailed 2-3 sentences on why investors should invest in this stock]
+        - **Key Risks to Identify:** [Provide a detailed 2-3 sentence breakdown of the key risks identified]
 
         ### 🛠 Required Next Steps
         - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
