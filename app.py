@@ -653,16 +653,16 @@ Replace with:
         Depending on the MANDATORY DESIGNATION provided above, adapt your breakdown inside the sections below using these parameters:
 
         1. If the status is "🚀 DEEP DIVE ASAP":
-           - **Core Investment Thesis:** Strongly highlight exactly why this asset presents an exceptional opportunity. If dilution was present but offset by growth/capex/guidance, explicitly frame the equity raise as a positive, strategic capital deployment mechanism required to fund a generational land grab. You must cite the specific Revenue Growth % and Shares Outstanding % from the data. Highlight why topline hyper-velocity trumps standard capital dilution guidelines.
-           - **Key Risks to Identify:** Explicitly map out the asymmetric blindspots, complex operational risk elements, or structural assumptions the analyst must verify or clear (e.g., infrastructure execution risk, capacity utilisation delays, guidance credibility).
+           - **Core Investment Thesis:** Explain why this business deserves immediate deeper research by combining the strongest evidence from the Business Phase, Competitive Moat, Future Growth, Financial Health, Valuation and TSR Driver analyses. Focus on the structural characteristics that make this an exceptional long-term compounder or mispriced opportunity. Do not simply repeat metrics—explain why they matter.
+           - **Key Risks to Identify:** Identify the one or two most important assumptions that still require validation before investing and explain how they could affect the investment case.
 
         2. If the status is "⏳ ADD TO WATCHLIST":
-           - **Core Investment Thesis:** Explain what is structurally preventing this asset from unlocking an immediate Deep Dive recommendation right now. If dilution is the reason, cite the specific Shares Outstanding % vs FCF number. Focus on scale confirmation, validation of unit economics, or near-term margins adjustments.
-           - **Key Risks to Identify:** Identify precisely what fundamental benchmark shifts, valuation thresholds, or corporate operational changes need to be met for this asset to become fully worthy of active investment attention.
+           - **Core Investment Thesis:** Explain why the business is interesting but not yet compelling enough for a Deep Dive. Identify the one or two fundamental factors preventing a higher conviction rating and explain what operational, financial or valuation improvements would justify upgrading the recommendation.
+           - **Key Risks to Identify:** Highlight the most important risks or uncertainties that investors should continue monitoring over the next 6–12 months.
 
         3. If the status contains "❌ PASS":
-           - **Core Investment Thesis:** Clearly diagnose that this asset failed the structural selection framework. If failure is due to Shareholder Alignment/Dilution, you MUST cite the specific data point: "Shares Outstanding +X% YoY while TTM FCF was €Y". Distinguish between 'dilution funding losses' vs 'dilution funding growth capex'. Do NOT use generic phrases like 'toxic capital structure' without data. Focus heavily on why the combination of life cycle constraints, toxic metrics, or poor efficiency creates a permanent destruction of capital risk.
-           - **Key Risks to Identify:** Outline the specific systemic risk factors, balance sheet or execution vulnerabilities that make this target completely uninvestable.
+           - **Core Investment Thesis:** Explain why the business does not currently satisfy the investment framework. Focus on the combination of structural weaknesses identified throughout the earlier analysis, such as business quality, competitive positioning, financial performance, valuation, lifecycle stage or execution risk. Do not over-emphasise any single metric unless it is clearly the dominant issue.
+           - **Key Risks to Identify:** Explain the fundamental issues that make the business unattractive today and identify what major changes would have to occur before it would deserve reconsideration.
 
         Output ONLY the markdown format below. Ensure the layout matches perfectly. Use the specific HTML structure provided below for the Final Recommendation to make it pop out with massive text and clear separation.
 
