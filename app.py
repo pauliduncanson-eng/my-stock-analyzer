@@ -675,13 +675,46 @@ Replace with:
 
         **Core Investment Thesis (The \"Why\"):** [A punchy, single-sentence summary validating the system reasoning: '{rule_justification}']
 
-        ### 📋 Core Investment Thesis & Risks
-        - **Core Investment Thesis:** [Provide a detailed 2-3 sentences on why investors should invest in this stock]
-        - **Key Risks to Identify:** [Provide a detailed 2-3 sentence breakdown of the key risks identified]
+        ### 📋 Investment Committee Thesis
 
-        ### 🛠 Required Next Steps
-        - **Primary Blindspot to Verify:** [Identify the #1 operational metric or data point needed to monitor this decision.]
-        - **Trigger Condition:** [Define a clear operational or valuation parameter trigger to change position status.]
+        - **Core Investment Thesis:**
+
+        Write this as if presenting to an institutional investment committee.
+
+        Do NOT describe the company or summarise its products.
+
+        Instead explain:
+
+        • What is the company's economic engine?
+
+        • What durable competitive advantage protects that engine?
+
+        • What specific growth drivers are likely to increase revenue, margins or free cash flow over the next 3–5 years?
+
+        • Why could today's valuation underestimate those strengths?
+
+        Connect these ideas into one coherent investment thesis.
+
+        Every statement MUST be supported by evidence already established elsewhere in this analysis.
+
+        Do NOT invent new competitive advantages, growth drivers, risks or valuation arguments.
+
+        If sufficient evidence does not exist, explicitly state that further research is required instead of guessing.
+
+        Limit the thesis to approximately 150–200 words.
+
+        - **Key Risks to Identify:**
+
+        Identify the TWO highest-conviction risks that could invalidate the investment thesis.
+
+        For each risk explain:
+
+        • Why it matters
+
+        • Which metric should be monitored
+
+        • What evidence would prove the risk is becoming real
+
         """
         try:
             p8_output = generate_analysis_layer(ticker, p8_prompt)
